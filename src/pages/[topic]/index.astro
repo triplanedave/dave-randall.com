@@ -1,0 +1,116 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import { allTopics, seriesPosts, livePosts, isLive, urlOf, topicOf, fmtDate, pad, type Topic } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const topics = await allTopics();
+  return topics.map((t) => ({ params: { topic: t.id }, props: { topic: t } }));
+}
+
+const { topic } = Astro.props as { topic: Topic };
+const series = (await getCollection('series')).filter((s) => s.data.topic === topic.id);
+const seriesData = await Promise.all(
+  series.map(async (s) => {
+    const posts = await seriesPosts(s.id);
+    const weeks = s.data.weeks.length
+      ? s.data.weeks.map((w) => ({ ...w, posts: posts.filter((p) => p.data.week === w.week) }))
+      : posts.length ? [{ week: 0, theme: '', tagline: '', posts }] : [];
+    return { s, weeks, liveCount: posts.filter((p) => isLive(p)).length };
+  }),
+);
+const articles = (await livePosts()).filter((p) => topicOf(p) === topic.id && !p.data.series);
+---
+<Base title={topic.data.title} description={topic.data.description} accent={topic.data.accent} accentDark={topic.data.accentDark}>
+  <header class="topic-head">
+    <div class="wrap">
+      <p class="eyebrow">Topic</p>
+      <h1>{topic.data.title}</h1>
+      <p class="lead">{topic.data.description}</p>
+    </div>
+  </header>
+
+  {seriesData.map(({ s, weeks, liveCount }) => (
+    <section class="wrap series" id={s.id}>
+      <div class="series-head">
+        <h2>{s.data.title}</h2>
+        <p class="desc">{s.data.description}</p>
+        <p class="meta">
+          {liveCount} of {s.data.totalDays} published
+          {s.data.hashtag && <> · <a href={`https://www.linkedin.com/feed/hashtag/${s.data.hashtag.replace('#', '').toLowerCase()}/`}>{s.data.hashtag} on LinkedIn</a></>}
+        </p>
+      </div>
+
+      {s.data.note && liveCount === 0 && <p class="note">{s.data.note}</p>}
+
+      <div class="weeks">
+        {weeks.map((w) => (
+          <div class="week">
+            {w.week > 0 && (
+              <div class="week-head">
+                <span class="wk">Week {w.week}</span>
+                <h3>{w.theme}</h3>
+                {w.tagline && <p>{w.tagline}</p>}
+              </div>
+            )}
+            <ol class="days">
+              {w.posts.map((p) => {
+                const live = isLive(p);
+                return (
+                  <li class={live ? 'live' : 'soon'}>
+                    {live ? (
+                      <a href={urlOf(p)}>
+                        <span class="num">{pad(p.data.day ?? 0)}</span>
+                        <span class="title">{p.data.title}</span>
+                      </a>
+                    ) : (
+                      <div>
+                        <span class="num">{pad(p.data.day ?? 0)}</span>
+                        <span class="title">{p.data.title}</span>
+                        <span class="when">Coming {fmtDate(p.data.date, { month: 'short', day: 'numeric' })}</span>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  {articles.length > 0 && (
+    <section class="wrap series">
+      <div class="series-head"><h2>Guides and articles</h2></div>
+      <PostList posts={articles} />
+    </section>
+  )}
+</Base>
+
+<style>
+  .topic-head { background: var(--paper-2); border-bottom: 1px solid var(--line); border-top: 6px solid var(--accent); padding: 56px 0 48px; }
+  h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; letter-spacing: -0.03em; margin: 10px 0 16px; }
+  .lead { margin: 0; max-width: 60ch; color: var(--ink-2); font-size: 1.15rem; }
+  .series { margin-top: 64px; }
+  .series-head h2 { font-size: 2rem; letter-spacing: -0.02em; margin: 0 0 10px; line-height: 1.15; }
+  .desc { margin: 0; max-width: 68ch; color: var(--ink-2); }
+  .meta { margin: 12px 0 0; font-size: 15px; color: var(--muted); }
+  .note { margin: 28px 0 0; padding: 18px 20px; border: 1px dashed var(--line); border-radius: 10px; color: var(--ink-2); background: var(--paper-2); }
+  .weeks { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 32px; }
+  .week { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--paper); }
+  .week-head { padding: 18px 20px 16px; border-bottom: 1px solid var(--line); background: var(--paper-2); }
+  .wk { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+  .week-head h3 { margin: 4px 0 0; font-size: 1.25rem; line-height: 1.2; }
+  .week-head p { margin: 2px 0 0; font-size: 15px; color: var(--muted); }
+  .days { list-style: none; margin: 0; padding: 6px 0; }
+  .days li a, .days li > div { display: grid; grid-template-columns: 34px 1fr; column-gap: 8px; padding: 10px 20px; font-size: 16px; line-height: 1.35; text-decoration: none; }
+  .days li a { min-height: 44px; }
+  .days li a:hover { background: var(--paper-2); }
+  .days li a:hover .title { text-decoration: underline; text-decoration-color: var(--accent); }
+  .num { font-family: var(--mono); font-weight: 600; color: var(--accent); font-size: 14px; padding-top: 2px; }
+  .live .title { font-weight: 600; }
+  .soon .num, .soon .title { color: var(--muted); }
+  .when { grid-column: 2; font-size: 13px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+</style>

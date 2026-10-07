@@ -1,0 +1,70 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import SeriesCard from '../components/SeriesCard.astro';
+import PostList from '../components/PostList.astro';
+import { livePosts, allTopics } from '../lib/content';
+
+const series = await getCollection('series');
+const topics = await allTopics();
+const order = new Map(topics.map((t, i) => [t.id, i]));
+series.sort((a, b) => (order.get(a.data.topic) ?? 99) - (order.get(b.data.topic) ?? 99));
+const latest = (await livePosts()).slice(0, 5);
+---
+<Base title="Dave Randall">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <p class="eyebrow">Intune · Microsoft Graph · Endpoint management</p>
+        <h1>Practical Intune guidance, one post at a time.</h1>
+        <p class="lead">
+          The deep dives behind my LinkedIn series. Each daily post gets a page here with the diagram,
+          the details that don't fit in a post, and links to go further. Written for Intune customers
+          and the partners who run Intune for them.
+        </p>
+        <div class="actions">
+          <a class="btn primary" href="/rbac/">Start with RBAC</a>
+          <a class="btn" href="https://www.linkedin.com/in/dave-randall-6636333/">Follow on LinkedIn</a>
+        </div>
+      </div>
+      <img class="portrait" src="/images/dave-randall.jpg" alt="Dave Randall" width="360" height="360" />
+    </div>
+  </section>
+
+  <section class="wrap block">
+    <h2 class="section-title">Series</h2>
+    <div class="cards">
+      {series.map((s) => <SeriesCard series={s} />)}
+    </div>
+  </section>
+
+  {latest.length > 0 && (
+    <section class="wrap block">
+      <h2 class="section-title">Latest</h2>
+      <PostList posts={latest} />
+    </section>
+  )}
+</Base>
+
+<style>
+  .hero { border-bottom: 1px solid var(--line); background: var(--paper-2); }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 56px; align-items: center; padding-top: 72px; padding-bottom: 72px; }
+  h1 { font-size: clamp(2.3rem, 5vw, 3.6rem); line-height: 1.05; letter-spacing: -0.03em; margin: 14px 0 20px; max-width: 16ch; }
+  .lead { font-size: 1.15rem; color: var(--ink-2); max-width: 56ch; margin: 0; }
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+  .btn {
+    display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 8px;
+    font-weight: 600; text-decoration: none; border: 2px solid var(--ink); color: var(--ink);
+  }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn.primary { background: var(--red); border-color: var(--red); color: #fff; }
+  .btn.primary:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .portrait { width: 320px; height: 320px; object-fit: cover; border-radius: 50%; border: 6px solid var(--paper); box-shadow: 0 0 0 1px var(--line); }
+  @media (max-width: 820px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 32px; padding-top: 40px; padding-bottom: 48px; }
+    .portrait { width: 160px; height: 160px; order: -1; }
+  }
+  .block { margin-top: 72px; }
+  .section-title { font-family: var(--mono); font-size: 14px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0 0 20px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+</style>

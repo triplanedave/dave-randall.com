@@ -1,0 +1,8 @@
+title: Intune & Microsoft Graph
+navLabel: Graph
+description: >-
+  Automating Intune with Microsoft Graph: queries, scripts, permissions, and the
+  patterns that hold up in production.
+accent: "#0B7A75"
+accentDark: "#5CC8BF"
+order: 2

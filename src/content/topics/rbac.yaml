@@ -1,0 +1,8 @@
+title: Intune RBAC
+navLabel: RBAC
+description: >-
+  Role-based access control in Microsoft Intune, from built-in roles to scope tags,
+  delegated admin for partners, and governance at scale.
+accent: "#1F5FAE"
+accentDark: "#86B3E6"
+order: 1

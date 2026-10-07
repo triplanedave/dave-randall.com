@@ -1,0 +1,21 @@
+title: 20 Days of Intune RBAC
+topic: rbac
+hashtag: "#20DaysOfIntuneRBAC"
+description: >-
+  One Intune role-based access control concept every weekday for four weeks, with a
+  diagram, for Intune customers and the partners who manage Intune for them. It starts
+  with the basics and builds to the parts that trip up experienced admins.
+totalDays: 20
+weeks:
+  - week: 1
+    theme: Foundations
+    tagline: Who can do what
+  - week: 2
+    theme: Scoping
+    tagline: Where they can act
+  - week: 3
+    theme: Design patterns
+    tagline: Building for real organizations
+  - week: 4
+    theme: Governance
+    tagline: Keeping it secure at scale

@@ -1,0 +1,48 @@
+---
+import Base from '../layouts/Base.astro';
+import Logo from '../components/Logo.astro';
+---
+<Base title="About" description="About Dave Randall and Thunder Creek Creative Solutions.">
+  <div class="wrap about">
+    <img class="portrait" src="/images/dave-randall.jpg" alt="Dave Randall" width="280" height="280" />
+    <div class="prose">
+      <p class="eyebrow">About</p>
+      <h1>Dave Randall</h1>
+      <p class="lead">
+        I write practical, plain-language guidance on Microsoft Intune for the people who run it every day,
+        and for the partners who run it for their customers.
+      </p>
+      <!-- BIO: replace this paragraph with the About section from LinkedIn. -->
+      <p>[Your bio goes here: your background, what you work on today, and why you write these series.]</p>
+
+      <h2>How this site works</h2>
+      <p>
+        Each of my LinkedIn series gets a permanent home here. Every daily post links to a page with the full
+        diagram, the details that don't fit in a LinkedIn post, and links to Microsoft's documentation. The
+        pages stay up after a series ends, and I update them when Intune changes.
+      </p>
+
+      <h2>Thunder Creek Creative Solutions</h2>
+      <div class="co">
+        <Logo size={40} label="Thunder Creek Creative Solutions logo" />
+        <p>This site is published by Thunder Creek Creative Solutions.</p>
+      </div>
+
+      <h2>Get in touch</h2>
+      <p>The best way to reach me is a message on <a href="https://www.linkedin.com/in/dave-randall-6636333/">LinkedIn</a>. If you have a question for a series, post it as a comment on that day's post.</p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .about { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 56px; padding-top: 56px; align-items: start; }
+  .portrait { width: 280px; height: 280px; object-fit: cover; border-radius: 14px; }
+  h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); letter-spacing: -0.03em; line-height: 1.05; margin: 8px 0 16px; }
+  .lead { font-size: 1.2rem; color: var(--ink-2); }
+  .co { display: flex; gap: 16px; align-items: center; }
+  .co p { margin: 0; }
+  @media (max-width: 760px) {
+    .about { grid-template-columns: 1fr; gap: 28px; padding-top: 32px; }
+    .portrait { width: 160px; height: 160px; border-radius: 50%; }
+  }
+</style>

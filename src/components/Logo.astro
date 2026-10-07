@@ -1,0 +1,8 @@
+---
+interface Props { size?: number; label?: string }
+const { size = 32, label = 'Thunder Creek Creative Solutions' } = Astro.props;
+---
+<svg class="tc-mark" viewBox="5 20 991 660" width={Math.round(size * 1.5)} height={size} role="img" aria-label={label}>
+  <path fill="var(--red-mark)" d="M5 20H483V677L327 521V175H160Z" />
+  <path fill="var(--mark-dark)" d="M501 20H996L832 184H659V521H838L996 679H501Z" />
+</svg>
