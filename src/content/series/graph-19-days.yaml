@@ -1,0 +1,20 @@
+title: 19 Days of Intune Graph
+topic: graph
+hashtag: "#TheIntuneAPIGuy"
+description: >-
+  The Intune Fundamentals Guy, API Edition: a daily walk through automating Intune with
+  Microsoft Graph, from your first call and OData basics to safe changes at scale,
+  least-privilege automation, and reporting leaders actually use.
+totalDays: 19
+groupLabel: Part
+datePrecision: month
+weeks:
+  - week: 1
+    theme: Foundations
+    tagline: Auth, queries, and resilience
+  - week: 2
+    theme: Core Intune workloads
+    tagline: Policies, compliance, apps, audit, and reports
+  - week: 3
+    theme: Operating at scale
+    tagline: Drift, safe change, least privilege, and visibility

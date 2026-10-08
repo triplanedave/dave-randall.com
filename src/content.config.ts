@@ -28,6 +28,9 @@ const series = defineCollection({
       .array(z.object({ week: z.number(), theme: z.string(), tagline: z.string().optional() }))
       .default([]),
     note: z.string().optional(),  // shown on the hub, e.g. "Archive being imported"
+    groupLabel: z.string().default('Week'),  // what the groups in `weeks` are called: "Week", "Part"
+    // 'month' shows "January 2026" instead of an exact day, for series moved here after the fact
+    datePrecision: z.enum(['day', 'month']).default('day'),
   }),
 });
 

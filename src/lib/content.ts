@@ -37,4 +37,10 @@ export function fmtDate(d: Date, opts: Intl.DateTimeFormatOptions = { month: 'sh
   return d.toLocaleDateString('en-US', { timeZone: 'UTC', ...opts });
 }
 
-export const pad = (n: number) => String(n).padStart(2, '0');
+/** A post's date as readers should see it, honoring the series' datePrecision. */
+export function postDate(p: Post, s?: Series, long = false) {
+  if (s?.data.datePrecision === 'month') return fmtDate(p.data.date, { month: 'long', year: 'numeric' });
+  return fmtDate(p.data.date, long ? { month: 'long', day: 'numeric', year: 'numeric' } : undefined);
+}
+
+export const pad =(n: number) => String(n).padStart(2, '0');

@@ -88,6 +88,7 @@ a:hover { color: var(--red); }
 .prose h3 { font-size: 1.2rem; margin: 1.8em 0 0.4em; }
 .prose p, .prose ul, .prose ol { margin: 0 0 1.1em; }
 .prose li { margin: 0.3em 0; }
+.prose p, .prose li, .prose td { overflow-wrap: anywhere; }
 .prose strong { font-weight: 700; }
 .prose blockquote {
   margin: 1.5em 0; padding: 0.2em 0 0.2em 1.2em;

@@ -1,6 +1,6 @@
 ---
 import { getEntry } from 'astro:content';
-import { urlOf, topicOf, fmtDate, type Post } from '../lib/content';
+import { urlOf, topicOf, postDate, type Post } from '../lib/content';
 
 interface Props { posts: Post[] }
 const { posts } = Astro.props;
@@ -8,19 +8,19 @@ const rows = await Promise.all(
   posts.map(async (p) => {
     const s = p.data.series ? await getEntry('series', p.data.series) : undefined;
     const t = await getEntry('topics', topicOf(p));
-    return { p, kicker: s ? `${s.data.title} · Day ${p.data.day}` : t?.data.title ?? '' };
+    return { p, s, kicker: s ? `${s.data.title} · Day ${p.data.day}` : t?.data.title ?? '' };
   }),
 );
 ---
 <ol class="list">
-  {rows.map(({ p, kicker }) => (
+  {rows.map(({ p, s, kicker }) => (
     <li>
       <a href={urlOf(p)}>
         <span class="k">{kicker}</span>
         <span class="t">{p.data.title}</span>
         {p.data.summary && <span class="s">{p.data.summary}</span>}
       </a>
-      <time datetime={p.data.date.toISOString()}>{fmtDate(p.data.date)}</time>
+      <time datetime={p.data.date.toISOString()}>{postDate(p, s)}</time>
     </li>
   ))}
 </ol>

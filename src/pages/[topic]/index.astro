@@ -49,7 +49,7 @@ const articles = (await livePosts()).filter((p) => topicOf(p) === topic.id && !p
           <div class="week">
             {w.week > 0 && (
               <div class="week-head">
-                <span class="wk">Week {w.week}</span>
+                <span class="wk">{s.data.groupLabel} {w.week}</span>
                 <h3>{w.theme}</h3>
                 {w.tagline && <p>{w.tagline}</p>}
               </div>

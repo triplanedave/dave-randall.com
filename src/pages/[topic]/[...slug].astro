@@ -1,7 +1,7 @@
 ---
 import { getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { livePosts, seriesPosts, isLive, urlOf, topicOf, slugOf, fmtDate, pad, type Post } from '../../lib/content';
+import { livePosts, seriesPosts, isLive, urlOf, topicOf, slugOf, fmtDate, postDate, pad, type Post } from '../../lib/content';
 
 export async function getStaticPaths() {
   const posts = await livePosts();
@@ -40,13 +40,13 @@ const title = series ? `Day ${post.data.day}: ${post.data.title}` : post.data.ti
         {series && (
           <p class="eyebrow day">
             Day {post.data.day} of {series.data.totalDays}
-            {week && <> · Week {week.week}: {week.theme}</>}
+            {week && <> · {series.data.groupLabel} {week.week}: {week.theme}</>}
           </p>
         )}
         <h1>{post.data.title}</h1>
         {post.data.summary && <p class="lead">{post.data.summary}</p>}
         <div class="meta">
-          <time datetime={post.data.date.toISOString()}>{fmtDate(post.data.date, { month: 'long', day: 'numeric', year: 'numeric' })}</time>
+          <time datetime={post.data.date.toISOString()}>{postDate(post, series, true)}</time>
           {post.data.updated && <span>Updated {fmtDate(post.data.updated)}</span>}
           {post.data.linkedin ? (
             <a class="li" href={post.data.linkedin}>Read the LinkedIn post ↗</a>
@@ -88,7 +88,7 @@ const title = series ? `Day ${post.data.day}: ${post.data.title}` : post.data.ti
         <p class="eyebrow">{series.data.title}</p>
         {series.data.weeks.map((w) => (
           <div class="toc-week">
-            <p class="toc-wk">Week {w.week} · {w.theme}</p>
+            <p class="toc-wk">{series.data.groupLabel} {w.week} · {w.theme}</p>
             <ol>
               {siblings.filter((p) => p.data.week === w.week).map((p) => (
                 <li class={p.id === post.id ? 'cur' : isLive(p) ? '' : 'off'}>
@@ -107,7 +107,8 @@ const title = series ? `Day ${post.data.day}: ${post.data.title}` : post.data.ti
 
 <style>
   .layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 64px; padding-top: 40px; }
-  @media (max-width: 960px) { .layout { grid-template-columns: 1fr; gap: 48px; } }
+  @media (max-width: 960px) { .layout { grid-template-columns: minmax(0, 1fr); gap: 48px; } }
+  article { min-width: 0; }
   .crumbs { display: flex; flex-wrap: wrap; gap: 8px; font-size: 15px; color: var(--muted); }
   .crumbs a { color: var(--muted); }
   .post-head { margin-top: 24px; max-width: 70ch; }
