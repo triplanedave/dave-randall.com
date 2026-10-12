@@ -1,40 +1,43 @@
 ---
-title: How many people can wipe every device you manage?
+title: How many of your admins have only the permissions they need?
 series: rbac-20-days
 day: 1
 week: 1
 date: 2026-10-12
-summary: Why role-based access control is the Intune security gap hiding in plain sight, and what the next 20 days cover.
+summary: If you had to stop and check, you're not alone. That's why this series exists. Here's the four-week roadmap and who it's for.
 diagram: /images/rbac/roadmap.png
 diagramAlt: "Series roadmap: Week 1 Foundations, Week 2 Scoping, Week 3 Design, Week 4 Governance, building from basics to advanced."
 ---
 
-If you had to stop and check, you're not alone. In many tenants the honest answer is "everyone with Intune Administrator," and that list grew because it was easier than working out what each person actually needed.
+Quick question: how many admins in your tenant have **only the minimum permissions** for their task?
 
-That's the problem this series sets out to fix. **Role-based access control (RBAC)** in Intune lets you give each admin exactly the permissions their job needs, over exactly the users and devices they're responsible for. Microsoft calls this the principle of *least privilege*, and it runs through every post in the series.
+If you had to stop and check, you're not alone. And that's exactly why I'm starting this series.
 
-## Why it matters now
+Every weekday for four weeks, I'll post one Intune role-based access control concept with a diagram. To make sure everyone gets value from the series, I'll start with the basics and build up to the most challenging aspects of RBAC. Each post is built to read in under two minutes, and each one gets a page here with the full diagram, the details, and links to Microsoft's documentation.
 
-- **The blast radius is real.** Intune admins can wipe devices, push scripts, and change security policy across your whole fleet. One compromised or careless admin account with broad rights can do a lot of damage, quickly.
-- **Access keeps growing quietly.** New Intune features bring new permissions. A role that was right-sized last year may reach further today.
-- **Partners carry customer trust.** If you manage Intune for customers, how you delegate access is part of your security posture, and increasingly part of what customers ask about.
+## The roadmap
 
-## The four weeks
+**📘 Week 1 – Foundations: who can do what**
+Entra roles vs. Intune roles, built-in roles, and how permissions are built.
 
-| Week | Theme | What you'll learn |
-|---|---|---|
-| 1 | **Foundations** | Entra roles vs. Intune roles, the built-in roles, and how permissions are built |
-| 2 | **Scoping** | Scope groups, scope tags, and the difference that confuses almost everyone |
-| 3 | **Design patterns** | Custom roles, persona-based design, regional delegation, multiple assignments, and partner access |
-| 4 | **Governance** | Just-in-time access, Multi Admin Approval, auditing, and a reference architecture |
+**🎯 Week 2 – Scoping: where they can act**
+Scope groups, scope tags, and one gotcha I'll show you how to avoid.
 
-Each LinkedIn post is short enough to read in two minutes. Each page here goes further, with the full diagram, the details, and links to Microsoft's documentation.
+**🏗️ Week 3 – Design patterns: building for real organizations**
+Custom roles, persona-based design, regional delegation, and how multiple role assignments really combine.
+
+**🛡️ Week 4 – Governance: keeping it secure at scale**
+Just-in-time access with PIM, Multi Admin Approval, auditing, and a reference architecture to tie it all together.
 
 ## Who this is for
 
-**Intune customers:** if your help desk, app team, and security team all have Intune Administrator "because it was easier," this series will help you get to least privilege without breaking anyone's day.
+**✅ Intune customers.** If your support agents, app admins, and security team all have Intune Administrator "because it was easier," this series will help you get to least privilege without breaking anyone's day. And if you're already using RBAC, it will help you optimize your roles, scopes, and assignments.
 
-**Integration partners and MSPs:** if you deliver Intune services across customer tenants, we'll cover how to design delegated access that's repeatable, auditable, and defensible.
+**✅ Integration partners and MSPs.** If you deliver Intune services across customer tenants, RBAC is part of your security posture and your customers' trust. We'll cover how to design delegated access that's repeatable, auditable, and defensible.
+
+## Why it matters
+
+Intune admins can wipe devices, push scripts, and change security policy across your whole fleet. One compromised or careless account with broad rights can do a lot of damage, quickly. Least privilege, giving each admin exactly the permissions their job needs over exactly the users and devices they're responsible for, is the thread that runs through all 20 days.
 
 ## Further reading
 
