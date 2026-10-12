@@ -5,6 +5,7 @@ day: 1
 week: 1
 date: 2026-10-12
 summary: If you had to stop and check, you're not alone. That's why this series exists. Here's the four-week roadmap and who it's for.
+linkedin: https://lnkd.in/p/geaeScck
 diagram: /images/rbac/roadmap.png
 diagramAlt: "Series roadmap: Week 1 Foundations, Week 2 Scoping, Week 3 Design, Week 4 Governance, building from basics to advanced."
 ---
