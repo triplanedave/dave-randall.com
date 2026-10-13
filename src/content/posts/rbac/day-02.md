@@ -5,6 +5,7 @@ day: 2
 week: 1
 date: 2026-10-13
 summary: Intune Administrator isn't an Intune role. Knowing which plane a permission comes from tells you how far it reaches.
+linkedin: https://lnkd.in/p/g8C2mXgU
 diagram: /images/rbac/day-02.png
 diagramAlt: "Two stacked bands. Top: Microsoft Entra roles, privileged, tenant-wide, can't be scoped: Global Administrator, Intune Administrator, Security Administrator, Global Reader. Bottom: Intune RBAC roles, recommended, granular, can be scoped: Help Desk Operator, Application Manager, Policy and Profile Manager, your custom roles. A callout notes Intune Administrator appears as Intune Service Administrator in Graph and PowerShell."
 ---
