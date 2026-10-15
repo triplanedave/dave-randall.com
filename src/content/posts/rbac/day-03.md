@@ -5,6 +5,7 @@ day: 3
 week: 1
 date: 2026-10-14
 summary: Intune has ten built-in RBAC roles, each designed for a specific job. How many are you actually using?
+linkedin: https://lnkd.in/p/g2mQsr38
 diagram: /images/rbac/day-03.png
 diagramAlt: "Five personas mapped to built-in roles: Help desk to Help Desk Operator, App packager to Application Manager, Security analyst to Endpoint Security Manager, Auditor to Read Only Operator, RBAC owner to Intune Role Administrator, which is highlighted with a lock and labeled Protect this role."
 ---
