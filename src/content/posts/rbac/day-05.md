@@ -4,7 +4,7 @@ series: rbac-20-days
 day: 5
 week: 1
 date: 2026-10-16
-summary: Every Intune permission is a category plus an action. Here's the reference, the actions that deserve extra care, and why "read only" isn't always read only.
+summary: Every Intune permission is a category plus an action. A role is just a set of those pairs, and each category stands on its own. Plus the actions to watch closely.
 diagram: /images/rbac/day-05.png
 diagramAlt: "Permission anatomy: category plus action equals permission, for example Managed devices plus Read. A matrix for an example custom role, Help Desk Tier 1, grants Read on Device configurations, Mobile apps, Managed devices and Audit data, plus Update on Managed devices. Delete and Assign columns are highlighted as high impact and not granted. Remote tasks are granted one by one: Sync devices, Reboot now and Remote lock are granted; Wipe and Retire are not."
 ---
@@ -55,11 +55,11 @@ Intune has more than 50 permission categories. These are the ones most day-to-da
 | Impact | Examples |
 |---|---|
 | Destroys data or removes management | Wipe, Retire, Clean PC, Delete (under Managed devices) |
-| Exposes secrets | Get FileVault key, Rotate BitLockerKeys, Rotate Local Admin Password, Recover MDM Key, View macOS recovery lock password |
+| Exposes secrets or location | Get FileVault key, View macOS recovery lock password, Locate device |
 | Disrupts the user | Remote lock, Reboot now, Shut down, Reset passcode, Enable lost mode |
-| Low impact | Sync devices, Collect diagnostics, Locate device, Send custom notifications |
+| Low impact | Sync devices, Collect diagnostics, Windows Defender, Rotate Local Admin Password, Rotate BitLockerKeys |
 
-Grant remote tasks individually in custom roles rather than copying a whole set from a built-in role. Note that the built-in **Help Desk Operator** includes both **Wipe** and **Retire**.
+Wipe and Retire act on real devices with real data. **Grant remote tasks one at a time, never as a bundle.** Copying a built-in role brings its whole set along: the built-in **Help Desk Operator**, for example, includes both **Wipe** and **Retire**.
 
 **Remote Help.** The *Remote Help app* category now includes unattended control permissions, which let a helper connect to a device without the user present. Decide deliberately who gets those.
 
@@ -78,7 +78,11 @@ Intune has three built-in views under **Tenant administration** > **Roles** > **
 - **Roles by permission**: pick a permission and action, and see which roles, assignments, and groups grant it. This is the fastest way to answer "who can wipe devices?"
 - **Admin permissions**: enter any user and see their complete permission list.
 
-Try **Roles by permission** with *Remote tasks* > *Wipe*. The answer is often longer than people expect.
+**Try this today:** open **My permissions**. Is anything there a surprise? Then try **Roles by permission** with *Remote tasks* > *Wipe*. The answer is often longer than people expect.
+
+## That's a wrap on Week 1: Foundations
+
+Next week: **Scoping**, and the difference between scope groups and scope tags that trips up almost everyone.
 
 ## Further reading
 
