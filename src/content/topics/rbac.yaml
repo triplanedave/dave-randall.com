@@ -6,3 +6,7 @@ description: >-
 accent: "#1F5FAE"
 accentDark: "#86B3E6"
 order: 1
+guides:
+  - title: Intune RBAC permission reference
+    href: /rbac/permission-reference/
+    summary: Every custom role permission, what it really lets someone do, and the ones I'd never grant by default.

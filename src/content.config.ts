@@ -12,6 +12,8 @@ const topics = defineCollection({
     accent: z.string(),           // topic color, e.g. "#1F5FAE"
     accentDark: z.string(),       // same color tuned for dark mode
     order: z.number().default(10),
+    // Hand-built pages (not Markdown posts) to list under "Guides and references" on the topic page.
+    guides: z.array(z.object({ title: z.string(), href: z.string(), summary: z.string().optional() })).default([]),
   }),
 });
 

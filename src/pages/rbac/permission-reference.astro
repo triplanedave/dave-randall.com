@@ -1,0 +1,242 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getEntry } from 'astro:content';
+import { categories, sourceUrl, sourceUpdated, liveChecked } from '../../data/rbac-permissions';
+import { fmtDate } from '../../lib/content';
+
+const topic = await getEntry('topics', 'rbac');
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const total = categories.reduce((n, c) => n + c.perms.length, 0);
+const never = categories
+  .map((c) => ({ c, perms: c.perms.filter((p) => p.tier === 'never') }))
+  .filter((x) => x.perms.length);
+const neverCount = never.reduce((n, x) => n + x.perms.length, 0);
+const updated = fmtDate(new Date(sourceUpdated), { month: 'long', day: 'numeric', year: 'numeric' });
+const checked = fmtDate(new Date(liveChecked), { month: 'long', day: 'numeric', year: 'numeric' });
+const liveCount = categories.reduce((n, c) => n + c.perms.filter((p) => p.live).length, 0);
+const title = 'Intune RBAC permission reference';
+const description = `Every permission you can put in an Intune custom role: Microsoft's description, what it really lets someone do, and the ones I'd never grant by default.`;
+---
+<Base title={title} description={description} accent={topic?.data.accent} accentDark={topic?.data.accentDark}>
+  <header class="head">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="/rbac/">Intune RBAC</a><span aria-hidden="true">/</span><span>Reference</span></nav>
+      <h1>{title}</h1>
+      <p class="lead">
+        Every permission you can put in an Intune custom role, with Microsoft's description and, where it helps,
+        what the permission really lets someone do. Plus the ones I'd never grant by default.
+      </p>
+      <p class="facts">{categories.length} categories · {total} permissions · Source: <a href={sourceUrl}>Microsoft Learn</a> (updated {updated}), checked against a live tenant on {checked}</p>
+    </div>
+  </header>
+
+  <div class="wrap body">
+    <section class="intro prose">
+      <h2>How to read this</h2>
+      <p>
+        Each permission is a <strong>category</strong> plus an <strong>action</strong>, exactly as they appear when you build a custom role
+        in <strong>Tenant administration › Roles › All roles › Create</strong>. For each one you'll see:
+      </p>
+      <ul>
+        <li><strong>Microsoft's description,</strong> word for word from Microsoft Learn.</li>
+        <li>
+          <span class="badge new">New</span> marks the {liveCount} permissions that exist in a live tenant but aren't on Microsoft Learn yet.
+          Their description is the one Intune itself returns through Microsoft Graph.
+        </li>
+        <li><strong>In practice:</strong> my note on what the action actually touches and what can go wrong. I added these wherever Microsoft's description just repeats the action name, or where the impact isn't obvious.</li>
+        <li>
+          A rating: <span class="badge never">Never by default</span> means grant only to a small, named group, ideally just-in-time.
+          <span class="badge high">High impact</span> means it changes devices or users at scale, or exposes sensitive data, so grant it deliberately and scope it tightly.
+        </li>
+      </ul>
+      <p>
+        The ratings are my recommendations from years of working with Intune customers. They aren't Microsoft guidance.
+        For how categories and actions combine into roles, start with <a href="/rbac/day-05/">Day 5: Anatomy of a permission</a>.
+      </p>
+    </section>
+
+    <section class="never-box" aria-labelledby="never-h">
+      <h2 id="never-h">The {neverCount} permissions I'd never grant by default</h2>
+      <p>These destroy data, hand over keys and passwords, open remote access with no one watching, or control RBAC itself.</p>
+      <ul class="never-list">
+        {never.map(({ c, perms }) => (
+          <li><span class="nc">{c.name}</span>{perms.map((p) => <a href={`#${slug(c.name)}--${slug(p.action)}`}>{p.action.replace(/\.$/, '')}</a>)}</li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="check prose" aria-labelledby="check-h">
+      <h2 id="check-h">Check the list against your tenant</h2>
+      <p>
+        Intune adds permissions as features ship, and documentation can lag behind. When I last checked, a live tenant had five permissions that weren't documented yet. To see exactly what's live in yours,
+        run this in <a href="https://aka.ms/ge">Graph Explorer</a> (it needs <code>DeviceManagementRBAC.Read.All</code>):
+      </p>
+      <pre><code>GET https://graph.microsoft.com/beta/deviceManagement/resourceOperations?$select=resourceName,actionName,description</code></pre>
+      <p>Or with the Microsoft Graph PowerShell SDK, following every page of results:</p>
+      <pre><code>{`Connect-MgGraph -Scopes DeviceManagementRBAC.Read.All
+$uri = 'https://graph.microsoft.com/beta/deviceManagement/resourceOperations?$select=resourceName,actionName,description'
+$ops = while ($uri) {
+    $page = Invoke-MgGraphRequest -Uri $uri
+    $page.value
+    $uri = $page.'@odata.nextLink'
+}
+$ops | Sort-Object resourceName, actionName |
+    Select-Object resourceName, actionName, description |
+    Export-Csv .\\intune-permissions.csv -NoTypeInformation`}</code></pre>
+    </section>
+
+    <div class="tools" role="search">
+      <label for="q">Filter permissions</label>
+      <input id="q" type="search" placeholder="Try wipe, assign, key, password…" autocomplete="off" />
+      <label class="chk"><input id="risky" type="checkbox" /> Only high impact and never by default</label>
+      <p id="count" class="count" aria-live="polite">{total} permissions</p>
+    </div>
+
+    <nav class="index" aria-label="Categories">
+      {categories.map((c) => <a href={`#${slug(c.name)}`} data-cat-link={slug(c.name)}>{c.name}</a>)}
+    </nav>
+
+    <div id="ref">
+      {categories.map((c) => (
+        <section class="cat" id={slug(c.name)} data-cat={slug(c.name)}>
+          <h2>{c.name}</h2>
+          <p class="sum">{c.summary}</p>
+          <ul class="perms">
+            {c.perms.map((p) => (
+              <li class="perm" id={`${slug(c.name)}--${slug(p.action)}`} data-tier={p.tier ?? ''} data-text={`${c.name} ${p.action} ${p.ms} ${p.note ?? ''}`.toLowerCase()}>
+                <div class="ph">
+                  <h3>{p.action}</h3>
+                  {p.tier === 'never' && <span class="badge never">Never by default</span>}
+                  {p.tier === 'high' && <span class="badge high">High impact</span>}
+                  {p.live && <span class="badge new" title="In a live tenant, not yet documented on Microsoft Learn">New</span>}
+                </div>
+                <p class="ms"><span class="lbl">{p.live ? 'Microsoft (via Graph)' : 'Microsoft'}</span>{p.ms}</p>
+                {p.note && <p class="note"><span class="lbl">In practice</span>{p.note}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+      <p id="empty" class="empty" hidden>No permissions match that filter.</p>
+    </div>
+
+    <section class="prose more">
+      <h2>Further reading</h2>
+      <ul>
+        <li><a href={sourceUrl}>Create a custom role in Intune</a>, Microsoft Learn</li>
+        <li><a href="https://learn.microsoft.com/en-us/intune/fundamentals/role-based-access-control/ref-built-in-roles">Built-in role permissions for Microsoft Intune</a>, Microsoft Learn</li>
+        <li><a href="https://learn.microsoft.com/en-us/graph/api/intune-rbac-resourceoperation-list?view=graph-rest-beta">List resourceOperations (Microsoft Graph beta)</a>, Microsoft Learn</li>
+        <li><a href="https://learn.microsoft.com/en-us/intune/device-management/deployments/overview">Deployment plans and deployments overview</a>, Microsoft Learn</li>
+      </ul>
+    </section>
+  </div>
+</Base>
+
+<script is:inline>
+  (function () {
+    var q = document.getElementById('q');
+    var risky = document.getElementById('risky');
+    var count = document.getElementById('count');
+    var empty = document.getElementById('empty');
+    var perms = Array.prototype.slice.call(document.querySelectorAll('.perm'));
+    var cats = Array.prototype.slice.call(document.querySelectorAll('.cat'));
+    function apply() {
+      var term = q.value.trim().toLowerCase();
+      var onlyRisky = risky.checked;
+      var shown = 0;
+      perms.forEach(function (el) {
+        var ok = (!term || el.getAttribute('data-text').indexOf(term) !== -1) && (!onlyRisky || el.getAttribute('data-tier'));
+        el.hidden = !ok;
+        if (ok) shown++;
+      });
+      cats.forEach(function (sec) {
+        var any = sec.querySelector('.perm:not([hidden])');
+        sec.hidden = !any;
+        var link = document.querySelector('[data-cat-link="' + sec.getAttribute('data-cat') + '"]');
+        if (link) link.hidden = !any;
+      });
+      count.textContent = shown + (shown === 1 ? ' permission' : ' permissions');
+      empty.hidden = shown !== 0;
+    }
+    q.addEventListener('input', apply);
+    risky.addEventListener('change', apply);
+  })();
+</script>
+
+<style>
+  .head { background: var(--paper-2); border-bottom: 1px solid var(--line); border-top: 6px solid var(--accent); padding: 40px 0 40px; }
+  .crumbs { display: flex; gap: 8px; font-size: 15px; color: var(--muted); }
+  .crumbs a { color: var(--muted); }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.2rem); line-height: 1.06; letter-spacing: -0.03em; margin: 16px 0 14px; }
+  .lead { margin: 0; max-width: 64ch; font-size: 1.15rem; color: var(--ink-2); }
+  .facts { margin: 16px 0 0; font-family: var(--mono); font-size: 13px; letter-spacing: 0.04em; color: var(--muted); }
+  .facts a { color: var(--muted); }
+  .body { padding-top: 40px; }
+  .prose h2 { margin-top: 0; }
+  .intro, .check, .more { max-width: 72ch; }
+  .check, .more { margin-top: 48px; }
+
+  .badge {
+    display: inline-block; white-space: nowrap; font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; vertical-align: 2px;
+  }
+  .badge.never { background: #b3001b; color: #fff; }
+  .badge.high { background: #f2b544; color: #3a2600; }
+  .badge.new { background: transparent; color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+  @media (prefers-color-scheme: dark) { .badge.never { background: #ff6b6b; color: #1a0000; } }
+
+  .never-box { margin-top: 48px; padding: 28px; border: 2px solid #b3001b; border-radius: 14px; background: var(--paper); }
+  @media (prefers-color-scheme: dark) { .never-box { border-color: #ff6b6b; } }
+  .never-box h2 { margin: 0 0 6px; font-size: 1.4rem; letter-spacing: -0.01em; }
+  .never-box > p { margin: 0 0 16px; color: var(--ink-2); }
+  .never-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .never-list li { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; font-size: 16px; }
+  .nc { font-weight: 700; min-width: 15ch; }
+  .never-list a { padding: 2px 0; }
+  .never-list a:not(:last-child)::after { content: ','; color: var(--muted); }
+
+  .tools {
+    position: sticky; top: 64px; z-index: 3; margin-top: 48px; padding: 16px 0 14px; background: var(--paper);
+    border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+  }
+  .tools > label:first-child { position: absolute; left: -9999px; }
+  .tools input[type='search'] {
+    flex: 1 1 280px; min-height: 48px; padding: 0 14px; font: inherit; font-size: 17px; color: var(--ink);
+    background: var(--paper); border: 2px solid var(--line); border-radius: 10px;
+  }
+  .tools input[type='search']:focus { outline: none; border-color: var(--accent); }
+  .chk { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 15px; }
+  .chk input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .count { margin: 0; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+
+  .index { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 20px 0 8px; }
+  .index a {
+    font-size: 14px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; color: var(--ink-2);
+  }
+  .index a:hover { border-color: var(--accent); color: var(--ink); }
+
+  .cat { margin-top: 44px; scroll-margin-top: 150px; }
+  .cat h2 { font-size: 1.55rem; letter-spacing: -0.015em; margin: 0 0 6px; padding-bottom: 8px; border-bottom: 3px solid var(--accent); }
+  .sum { margin: 10px 0 0; color: var(--ink-2); max-width: 72ch; }
+  .perms { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px; }
+  .perm { padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); scroll-margin-top: 150px; }
+  .perm:target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .ph { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+  .perm h3 { margin: 0; font-size: 1.08rem; line-height: 1.35; }
+  .perm p { margin: 8px 0 0; font-size: 16px; line-height: 1.55; max-width: 80ch; overflow-wrap: anywhere; }
+  .ms { color: var(--ink-2); }
+  .lbl {
+    display: inline-block; margin-right: 8px; font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .note .lbl { color: var(--accent); }
+  .empty { margin-top: 32px; color: var(--muted); }
+  @media (max-width: 760px) {
+    .tools { position: static; }
+    .cat, .perm { scroll-margin-top: 72px; }
+  }
+  @media (max-width: 600px) {
+    .never-box { padding: 20px; }
+    .nc { min-width: 0; width: 100%; }
+  }
+</style>
