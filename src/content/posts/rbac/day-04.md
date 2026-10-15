@@ -5,6 +5,8 @@ day: 4
 week: 1
 date: 2026-10-15
 summary: A role defines what someone can do. An assignment decides who gets it and where it applies. Getting this split right is the foundation of everything else.
+diagram: /images/rbac/day-04.png
+diagramAlt: "One role, Help Desk Operator, branches into two assignments. Help Desk – US: members RBAC-HelpDesk-US, scope groups Devices-US and Users-US, scope tag US. Help Desk – EU: members RBAC-HelpDesk-EU, scope groups Devices-EU and Users-EU, scope tag EU."
 ---
 
 You can build a perfect custom role, and nobody gets any access until you assign it. That split is the most important mental model in Intune RBAC.
