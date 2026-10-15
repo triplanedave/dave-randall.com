@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getEntry } from 'astro:content';
-import { categories, sourceUrl, sourceUpdated } from '../../data/rbac-permissions';
+import { categories, sourceUrl, sourceUpdated, liveChecked } from '../../data/rbac-permissions';
 import { fmtDate } from '../../lib/content';
 
 const topic = await getEntry('topics', 'rbac');
@@ -12,6 +12,8 @@ const never = categories
   .filter((x) => x.perms.length);
 const neverCount = never.reduce((n, x) => n + x.perms.length, 0);
 const updated = fmtDate(new Date(sourceUpdated), { month: 'long', day: 'numeric', year: 'numeric' });
+const checked = fmtDate(new Date(liveChecked), { month: 'long', day: 'numeric', year: 'numeric' });
+const liveCount = categories.reduce((n, c) => n + c.perms.filter((p) => p.live).length, 0);
 const title = 'Intune RBAC permission reference';
 const description = `Every permission you can put in an Intune custom role: Microsoft's description, what it really lets someone do, and the ones I'd never grant by default.`;
 ---
@@ -24,7 +26,7 @@ const description = `Every permission you can put in an Intune custom role: Micr
         Every permission you can put in an Intune custom role, with Microsoft's description and, where it helps,
         what the permission really lets someone do. Plus the ones I'd never grant by default.
       </p>
-      <p class="facts">{categories.length} categories · {total} permissions · Source: <a href={sourceUrl}>Microsoft Learn</a>, updated {updated}</p>
+      <p class="facts">{categories.length} categories · {total} permissions · Source: <a href={sourceUrl}>Microsoft Learn</a> (updated {updated}), checked against a live tenant on {checked}</p>
     </div>
   </header>
 
@@ -37,6 +39,10 @@ const description = `Every permission you can put in an Intune custom role: Micr
       </p>
       <ul>
         <li><strong>Microsoft's description,</strong> word for word from Microsoft Learn.</li>
+        <li>
+          <span class="badge new">New</span> marks the {liveCount} permissions that exist in a live tenant but aren't on Microsoft Learn yet.
+          Their description is the one Intune itself returns through Microsoft Graph.
+        </li>
         <li><strong>In practice:</strong> my note on what the action actually touches and what can go wrong. I added these wherever Microsoft's description just repeats the action name, or where the impact isn't obvious.</li>
         <li>
           A rating: <span class="badge never">Never by default</span> means grant only to a small, named group, ideally just-in-time.
@@ -62,7 +68,7 @@ const description = `Every permission you can put in an Intune custom role: Micr
     <section class="check prose" aria-labelledby="check-h">
       <h2 id="check-h">Check the list against your tenant</h2>
       <p>
-        Intune adds permissions as features ship, and documentation can lag behind. To see exactly what's live in your tenant,
+        Intune adds permissions as features ship, and documentation can lag behind. When I last checked, a live tenant had five permissions that weren't documented yet. To see exactly what's live in yours,
         run this in <a href="https://aka.ms/ge">Graph Explorer</a> (it needs <code>DeviceManagementRBAC.Read.All</code>):
       </p>
       <pre><code>GET https://graph.microsoft.com/beta/deviceManagement/resourceOperations?$select=resourceName,actionName,description</code></pre>
@@ -102,8 +108,9 @@ $ops | Sort-Object resourceName, actionName |
                   <h3>{p.action}</h3>
                   {p.tier === 'never' && <span class="badge never">Never by default</span>}
                   {p.tier === 'high' && <span class="badge high">High impact</span>}
+                  {p.live && <span class="badge new" title="In a live tenant, not yet documented on Microsoft Learn">New</span>}
                 </div>
-                <p class="ms"><span class="lbl">Microsoft</span>{p.ms}</p>
+                <p class="ms"><span class="lbl">{p.live ? 'Microsoft (via Graph)' : 'Microsoft'}</span>{p.ms}</p>
                 {p.note && <p class="note"><span class="lbl">In practice</span>{p.note}</p>}
               </li>
             ))}
@@ -175,6 +182,7 @@ $ops | Sort-Object resourceName, actionName |
   }
   .badge.never { background: #b3001b; color: #fff; }
   .badge.high { background: #f2b544; color: #3a2600; }
+  .badge.new { background: transparent; color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
   @media (prefers-color-scheme: dark) { .badge.never { background: #ff6b6b; color: #1a0000; } }
 
   .never-box { margin-top: 48px; padding: 28px; border: 2px solid #b3001b; border-radius: 14px; background: var(--paper); }

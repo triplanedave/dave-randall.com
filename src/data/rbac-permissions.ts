@@ -6,12 +6,16 @@
 //         'high'  = changes devices or users at scale, or exposes data; grant deliberately and scope it.
 
 export type Tier = 'never' | 'high';
-export interface Perm { action: string; ms: string; note?: string; tier?: Tier }
+// `live`: true when the permission exists in a live tenant (Graph resourceOperations) but isn't on Learn yet;
+//         `ms` is then the description Graph returns.
+export interface Perm { action: string; ms: string; note?: string; tier?: Tier; live?: boolean }
 export interface Category { name: string; summary: string; perms: Perm[] }
 
 const p = (action: string, ms: string, note?: string, tier?: Tier): Perm => ({ action, ms, note, tier });
+const live = (action: string, ms: string, note?: string, tier?: Tier): Perm => ({ action, ms, note, tier, live: true });
 
 export const sourceUpdated = '2026-08-24';
+export const liveChecked = '2026-10-15';
 export const sourceUrl = 'https://learn.microsoft.com/en-us/intune/fundamentals/role-based-access-control/create-custom-role';
 
 export const categories: Category[] = [
@@ -366,6 +370,7 @@ export const categories: Category[] = [
       p('Read', `View mobile applications such as store apps, line-of-business apps, web-links, or built-in apps. You can also view books purchased through the Apple Volume Purchase Program or add eBook categories. You can view iOS VPP Tokens, Windows Symantec certificates, Windows side loading keys, app categories, or the Android for Work connection. See the note following this table regarding Apple Volume Purchase Program (VPP) apps.`),
       p('Relate', `Create relationships with other managed apps using Dependencies and Supersedence features.`, `Supersedence can uninstall the app it replaces, and dependencies install extra apps automatically. Relationships change what lands on devices without touching any assignment.`, 'high'),
       p('Update', `Manage mobile applications such as store apps, line-of-business apps, web-links, or built-in apps. You can also manage books purchased through the Apple Volume Purchase Program or add eBook categories. You can manage iOS VPP Tokens, Windows Symantec certificates, Windows side loading keys, app categories, or the Android for Work connection. The Mobile Applications Create permission may be required for certain application update scenarios. See the note following this table regarding Apple Volume Purchase Program (VPP) apps.`, `Swapping the package or detection rules on an already-assigned app changes what installs on every targeted device.`, 'high'),
+      live('View reports', `Generate, view, or export reports for applications, such as store apps, line-of-business apps, web-links, and built-in apps.`, `Install status and app reports. Read-only, and a good fit for app owners who need to see results without changing anything.`),
     ],
   },
   {
@@ -476,7 +481,9 @@ export const categories: Category[] = [
     summary: `Individual actions you can trigger on a device. Each one is granted separately, so grant only the ones each job needs.`,
     perms: [
       p('Bypass activation lock', `Remove the Activation Lock from supervised devices without requiring the user's Apple ID and password. This may be required if a user leaves the company and returns the device; without the user's Apple ID and password, there's no way to reactivate the device. Or, you need to reassign some devices to a different department during a device refresh in your organization. You can only reassign devices that don't have Activation Lock enabled. You must also have the Managed Device > Read permission to view devices in the Azure portal before initiating this remote task.`, `Activation Lock is Apple's anti-theft protection. Bypassing it is right when reassigning a returned device, and also exactly what a thief would want.`, 'never'),
+      live('Cancel enhanced log collection', `Cancel an in-progress enhanced log collection request on a device.`),
       p('Change assignments', `Allows IT Admin to initiate a change assignments action. Action allows the selection of assigned applications and configuration to be removed from a device. Additionally, previously removed applications and configuration to be restored on the device.`, `Removes assigned apps and configuration from one device, including security configuration. It's a per-device exception that bypasses your group targeting.`, 'high'),
+      live('Change organizational unit', `Move a Chrome Enterprise device to an existing organizational unit in your Google Workspace domain.`, `In Google Workspace, the organizational unit decides which Chrome policies and apps a device gets. Moving a Chromebook to another OU changes its whole configuration.`, 'high'),
       p('Clean PC', `Initiate a Fresh start device action. This action removes any apps that are installed on a Windows 10 PC that's running the Creators Update. Then, it automatically updates the PC to the latest version of Windows.`, `Removes every installed app from the PC. The user can be offline for hours while it rebuilds.`, 'never'),
       p('Collect diagnostics', `Collect device diagnostics`, `Uploads logs and diagnostic files from the device. Low risk, but diagnostics can contain user and system details, so treat the files as sensitive.`),
       p('Disable lost mode', `Turn off lost mode for an iOS or ChromeOS device.`),
@@ -494,6 +501,7 @@ export const categories: Category[] = [
       p('Recover MDM Key', `Initiate Mobile Device Management (MDM) certificate's private key recovery with TPM attestation`, `A repair action for the device's management certificate. Useful for support engineers, rarely needed day to day.`),
       p('Remote lock', `The Remote lock device action locks the device. To unlock the device, the device owner enters their passcode. You can remotely lock devices that have a PIN or password set. Devices that don't have a PIN or password can't be remotely locked.`),
       p('Remove Device Firmware Configuration Interface Management.', `Allows admin to initiate removal of device from Device Firmware Configuration Interface management before deleting the Intune and Autopilot records.`, `DFCI locks down firmware settings like boot from USB. Removing it hands firmware control back to whoever has the device.`, 'never'),
+      live('Remove cellular data plan', `Remove the data plan for cellular Android Enterprise devices that support eSIM.`, `The device loses its cellular connection, and it may not be reachable for management again until it's on Wi-Fi.`, 'high'),
       p('Reset passcode', `Initiates a forced removal of the passcode, and requires the device user to set a new passcode. Supported on iOS devices, and certain later versions of Android and Android for work. Not supported on older Android versions, macOS, or Windows.`, `Removes the passcode until the user sets a new one, so the device is unprotected in between. Verify who's asking before you use it.`, 'high'),
       p('Restore Managed Home Screen', `Manually restore Managed Home Screen on Android Enterprise devices to return them to kiosk mode from a temporarily suspended state. Complements the temporary suspend action for complete kiosk mode management.`),
       p('Retire', `Initiates a retire action for a device. Also called remove company data. The Remove company data action removes managed app data (where applicable), settings, and email profiles that were assigned by using Intune. The device is removed from Intune management. This happens the next time the device checks in and receives the remote Remove company data action. Remove company data leaves the user's personal data on the device. For ChromeOS devices, this starts a deprovision action.`, `Personal data stays, but the device leaves management and loses company apps, email, and settings.`, 'never'),
@@ -509,7 +517,8 @@ export const categories: Category[] = [
       p('Shut down', `Initiates a shutdown of the device, and will automatically close all applications and running services and leave the device in a powered-off state.`, `Someone has to physically turn the device back on.`),
       p('Sync devices.', `Initiates a sync operation on the device and forces the selected device to immediately check in with Intune. When a device checks in, it immediately receives any pending actions or policies that have been assigned to it.`, `Safe and useful. A great first permission for tier 1.`),
       p('Temporarily suspend Managed Home Screen', `Remotely suspend Managed Home Screen on Android Enterprise devices in kiosk mode, allowing temporary access to the default launcher experience. Supports automatic restoration after a configured time period without requiring user interaction or PIN sharing.`, `Takes a kiosk device out of kiosk mode for a while, so whoever is holding it gets the normal launcher.`),
-      p('Update cellular data plan', `Activate the data plan for cellular iOS/iPadOS devices that support eSIM.`),
+      live('Trigger enhanced log collection', `Initiate enhanced log collection on a device to gather detailed diagnostic logs for troubleshooting.`, `More detailed than Collect diagnostics, so the logs are more likely to contain user and system details. Treat the output as sensitive.`),
+      p('Update cellular data plan', `Activate the data plan for cellular iOS/iPadOS devices that support eSIM.`, `In a live tenant (October 2026) this also covers Android Enterprise devices with eSIM.`),
       p('Update device account', `Allows changing the device account associated with Surface Hub devices, and set authentication options such as password rotation.`),
       p('View macOS recovery lock password', `View the recovery lock password in the Recovery Keys blade of macOS devices`, `Recovery Lock protects macOS Recovery, where someone could reinstall or wipe the Mac. The password is a key to that door.`, 'never'),
       p('Windows Defender', `Initiates a Windows Defender signature update.`, `Safe and helpful.`),

@@ -40,7 +40,7 @@ Intune has more than 50 permission categories. These are the ones most day-to-da
 | Roles | Assign, Create, Delete, Read, Update |
 | Multi Admin Approval | Approval for Multi Admin Approval, Create/Delete/Read/Update access policy |
 | Remote Help app | Elevation, Take full control, View screen, Android unattended control, Windows unattended control remote sign-in |
-| Remote tasks | 39 individual device actions (below) |
+| Remote tasks | 40+ individual device actions (below) |
 
 📖 **The full list is in my [Intune RBAC permission reference](/rbac/permission-reference/):** every category and action, what each one actually lets someone do, and the ones I'd never grant by default.
 
@@ -50,7 +50,7 @@ Intune has more than 50 permission categories. These are the ones most day-to-da
 
 **Delete.** For most Intune objects, there's no recycle bin.
 
-**Remote tasks.** This category contains 39 separate device actions, and they're not equally risky. My rough grouping:
+**Remote tasks.** This category contains more than 40 separate device actions, and they're not equally risky. My rough grouping:
 
 | Impact | Examples |
 |---|---|
