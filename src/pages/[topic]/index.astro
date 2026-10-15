@@ -81,10 +81,17 @@ const articles = (await livePosts()).filter((p) => topicOf(p) === topic.id && !p
     </section>
   ))}
 
-  {articles.length > 0 && (
+  {(articles.length > 0 || topic.data.guides.length > 0) && (
     <section class="wrap series">
-      <div class="series-head"><h2>Guides and articles</h2></div>
-      <PostList posts={articles} />
+      <div class="series-head"><h2>Guides and references</h2></div>
+      {topic.data.guides.length > 0 && (
+        <ul class="guides">
+          {topic.data.guides.map((g) => (
+            <li><a href={g.href}><span class="gt">{g.title}</span>{g.summary && <span class="gs">{g.summary}</span>}</a></li>
+          ))}
+        </ul>
+      )}
+      {articles.length > 0 && <PostList posts={articles} />}
     </section>
   )}
 </Base>
@@ -112,5 +119,10 @@ const articles = (await livePosts()).filter((p) => topicOf(p) === topic.id && !p
   .num { font-family: var(--mono); font-weight: 600; color: var(--accent); font-size: 14px; padding-top: 2px; }
   .live .title { font-weight: 600; }
   .soon .num, .soon .title { color: var(--muted); }
+  .guides { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 12px; }
+  .guides a { display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; border: 1px solid var(--line); border-left: 0; border-top: 4px solid var(--accent); border-radius: 12px; text-decoration: none; max-width: 760px; }
+  .guides a:hover { border-color: var(--accent); }
+  .gt { font-size: 1.2rem; font-weight: 700; }
+  .gs { color: var(--ink-2); font-size: 16px; }
   .when { grid-column: 2; font-size: 13px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
 </style>

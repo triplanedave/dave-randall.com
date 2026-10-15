@@ -40,9 +40,9 @@ Intune has more than 50 permission categories. These are the ones most day-to-da
 | Roles | Assign, Create, Delete, Read, Update |
 | Multi Admin Approval | Approval for Multi Admin Approval, Create/Delete/Read/Update access policy |
 | Remote Help app | Elevation, Take full control, View screen, Android unattended control, Windows unattended control remote sign-in |
-| Remote tasks | 40+ individual device actions (below) |
+| Remote tasks | 39 individual device actions (below) |
 
-The complete list is in [Create a custom role in Intune](https://learn.microsoft.com/en-us/intune/fundamentals/role-based-access-control/create-custom-role#custom-role-permissions) on Microsoft Learn.
+📖 **The full list is in my [Intune RBAC permission reference](/rbac/permission-reference/):** every category and action, what each one actually lets someone do, and the ones I'd never grant by default.
 
 ## Actions that deserve extra care
 
@@ -50,7 +50,7 @@ The complete list is in [Create a custom role in Intune](https://learn.microsoft
 
 **Delete.** For most Intune objects, there's no recycle bin.
 
-**Remote tasks.** This category contains more than 40 separate device actions, and they're not equally risky. My rough grouping:
+**Remote tasks.** This category contains 39 separate device actions, and they're not equally risky. My rough grouping:
 
 | Impact | Examples |
 |---|---|
@@ -81,6 +81,8 @@ Intune has three built-in views under **Tenant administration** > **Roles** > **
 Try **Roles by permission** with *Remote tasks* > *Wipe*. The answer is often longer than people expect.
 
 ## Further reading
+
+- [Intune RBAC permission reference](/rbac/permission-reference/), dave-randall.com
 
 - [Create a custom role in Intune](https://learn.microsoft.com/en-us/intune/fundamentals/role-based-access-control/create-custom-role), Microsoft Learn
 - [Built-in role permissions for Microsoft Intune](https://learn.microsoft.com/en-us/intune/fundamentals/role-based-access-control/ref-built-in-roles), Microsoft Learn
