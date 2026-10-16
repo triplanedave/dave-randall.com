@@ -110,3 +110,16 @@ a:hover { color: var(--red); }
 .prose th { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .prose hr { border: 0; border-top: 1px solid var(--line); margin: 2.5em 0; }
 .prose img { border-radius: var(--radius); border: 1px solid var(--line); margin: 1.5em 0; }
+
+/* ---- "History lesson" aside inside posts ---- */
+.prose aside.history {
+  margin: 3em 0; padding: 4px 28px 12px; border-radius: 14px;
+  background: var(--paper-2); border: 1px solid var(--line); border-top: 5px solid var(--accent);
+}
+.prose aside.history .history-tag {
+  margin: 22px 0 0; font-family: var(--mono); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+}
+.prose aside.history h2 { margin-top: 0.3em; }
+.prose aside.history h3 { margin-top: 1.6em; }
+@media (max-width: 600px) { .prose aside.history { padding: 2px 18px 8px; } }

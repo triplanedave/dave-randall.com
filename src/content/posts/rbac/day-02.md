@@ -62,6 +62,43 @@ How many people in your tenant are assigned **Intune Administrator** or **Global
 
 Tomorrow: the built-in Intune roles, and which job each one is designed for.
 
+<aside class="history" aria-labelledby="why-two-permission-planes">
+
+<p class="history-tag">History lesson</p>
+
+## Why two permission planes?
+
+When Intune was still **Windows Intune**, from roughly 2010 to 2014, it had a simple permissions model with three roles: **Read Only Operator**, **Full Administrator**, and **Help Desk Operator**. That's it!
+
+### Borrowing a role from Azure AD
+
+We wanted to align with the administrative roles being defined in Azure Active Directory (AAD). AAD was still in its early stages, but we wanted to be forward-thinking. Other Microsoft teams were building roles in AAD, and they typically named them as "service" roles: a role you assign to the person who administers that service. That's why the original Intune role was called **Intune Service Administrator**. It was the person managing the Intune service, in contrast to AAD's own native roles, which didn't carry the "service" label.
+
+Remember the Full Administrator? Instead of rebuilding it inside Intune, we decided to use the new Intune Service Administrator role as the Full Administrator. **That was the start of the two permission planes.** Entra later dropped "Service" from the display name, and today the role is simply **Intune Administrator**, though Intune Service Administrator is still the name you'll see in Graph and PowerShell.
+
+### Learning from Configuration Manager
+
+Customers were frustrated with the fixed permissions of those three roles. Configuration Manager (SCCM at the time) had a much richer role-based access control model, and it was the natural comparison. So we used it as our model, and that effort became the Intune RBAC you use today.
+
+- **Read Only Operator** and **Help Desk Operator** carried over as built-in roles.
+- **Intune Service Administrator** stayed in AAD, with full permissions to Intune plus the permissions needed to manage AAD users and groups. The intent was to make life easy for customers with a single Intune admin: one role with everything they needed.
+
+### Why "Assign" is its own permission
+
+We defined a set of built-in roles, and create, read, update, and delete (CRUD) permissions for each resource category. Because assigning a resource is a more impactful change, **Assign** became a separate permission instead of being folded into Create and Update. The same logic applied to **remote tasks**: rather than making them part of Update on devices, we split them out. Other non-CRUD permissions have been added over time for similar reasons.
+
+### Why not build it all in AAD?
+
+At the time, AAD didn't offer granular permissions for roles or the ability to customize them. Customers who had used (and liked) Configuration Manager RBAC told us that was a requirement. Intune also needed to define new resources and permissions on its own release schedule. So we let the AAD role manage everything in Intune, and built the granular role, permission, and resource model inside Intune itself.
+
+Custom roles didn't exist at all in the original Windows Intune, or in the early AAD roles. But with our own resources, permissions, and API for managing RBAC, we could build a full RBAC system.
+
+### And today?
+
+So there you have it. But needs and technology change. Entra (formerly AAD) is far more flexible now, and customers are increasingly frustrated with the separate, bespoke RBAC models across Microsoft's admin portals and services. In [Week 4](/rbac/#rbac-20-days), I'll come back to this and what it means for how you design Intune RBAC today.
+
+</aside>
+
 ## Further reading
 
 - [Microsoft Entra roles with Intune access](https://learn.microsoft.com/en-us/intune/fundamentals/role-based-access-control/overview#microsoft-entra-roles-with-intune-access), Microsoft Learn
