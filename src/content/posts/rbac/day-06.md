@@ -9,7 +9,9 @@ diagram: /images/rbac/day-06.png
 diagramAlt: "A role assignment splits into two sides. Left: Members (admin groups), who acts, for example RBAC-HelpDesk-Seattle. Right: Scope groups, who they can act on, for example Seattle users and Seattle devices. Below, the three scope group options: specific groups (recommended), All users, and All devices, with warnings that the All options reach everyone and that exclude groups must sit inside the scope groups."
 ---
 
-Week 2 is about **scoping**: making sure admins can only act where they're supposed to. It starts with the two "who" questions inside every role assignment.
+Week 2 is about **scoping**. Now that we have the basics defined, it's time to move deeper into role assignments.
+
+Every role assignment answers two different "who" questions. If you get them confused (I know, it's easy!), you can end up giving your help desk staff the ability to manage the whole tenant.
 
 ## Two groups, two jobs
 
@@ -24,7 +26,7 @@ Microsoft's wording: members of the admin groups "have permissions to manage use
 
 ## Scope groups limit where Assign works
 
-Scope groups matter most for **Assign**. An admin can only target groups that are listed in the scope groups of their role assignment. A Seattle admin whose scope groups are `Seattle users` and `Seattle devices` can't deploy a policy to `Paris devices`, even with the Assign permission.
+Scope groups matter most for **Assign**. An admin can only target groups that are listed in the scope groups of their role assignment. Get this right, and Seattle admins scoped to `Seattle users` and `Seattle devices` can't deploy to `Paris devices`, even with the Assign permission.
 
 ## The three options, and their traps
 
@@ -41,12 +43,12 @@ Two things trip people up:
 
 ## Keep your admin groups tight
 
-- Every member of an admin group gets everything the role grants. Only use groups whose membership you know and control.
+- Everyone in an admin group gets all the permissions the role grants. Keep those groups tight: only use groups whose membership you know and control.
 - If your tenant allows unlicensed admins, role assignments only apply to **direct** members of the admin group. Members of nested groups don't get the role unless they have an Intune license.
 
 ## Try it
 
-Open one of your role assignments and look at the **Scope (Groups)** page. If you see *All users* or *All devices*, ask: does this team really manage everyone, everywhere?
+Open a role assignment and look at the **Scope (Groups)** page. If you see *All users* or *All devices* in your scope groups, ask yourself: does this team really manage everyone, everywhere?
 
 Tomorrow: scope tags, which control what admins can *see*.
 
