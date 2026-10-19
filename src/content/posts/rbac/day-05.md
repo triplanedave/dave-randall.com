@@ -5,6 +5,7 @@ day: 5
 week: 1
 date: 2026-10-16
 summary: Every Intune permission is a category plus an action. A role is just a set of those pairs, and each category stands on its own. Plus the actions to watch closely.
+linkedin: https://lnkd.in/p/gbDUMUKt
 diagram: /images/rbac/day-05.png
 diagramAlt: "Permission anatomy: category plus action equals permission, for example Managed devices plus Read. A matrix for an example custom role, Help Desk Tier 1, grants Read on Device configurations, Mobile apps, Managed devices and Audit data, plus Update on Managed devices. Delete and Assign columns are highlighted as high impact and not granted. Remote tasks are granted one by one: Sync devices, Reboot now and Remote lock are granted; Wipe and Retire are not."
 ---
