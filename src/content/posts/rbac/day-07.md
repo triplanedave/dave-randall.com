@@ -16,10 +16,10 @@ Microsoft sums it up in two sentences: **roles determine what access admins have
 
 A scope tag is a label. You put it in two places:
 
-1. **On a role assignment** (the **Scope (Tags)** page of the assignment wizard).
-2. **On Intune objects:** configuration profiles, compliance policies, apps, devices, role assignments, and more. For most objects, you'll find it under **Properties** › **Scope (Tags)**.
+1. **On a role assignment** (the **Scope (Tags)** page of the assignment wizard). This sets the limit, or scope, of what the admin can see.
+2. **On Intune objects:** configuration profiles, compliance policies, apps, devices, role assignments, and more. These are the objects that tag limits. For most objects, you'll find it under **Properties** › **Scope (Tags)**.
 
-An admin sees an object only if the object carries one of the tags in the admin's role assignment.
+An admin only sees an object that carries one of the tags from their role assignment(s). Two admins open the same console and see two very different views.
 
 ## A worked example
 
@@ -45,9 +45,9 @@ Now the Seattle admin opens the same admin center as everyone else, but sees onl
 
 ## Scoped permissions
 
-Scope tags have one more twist, and it shows up when an admin has **more than one role assignment** with different tags.
+Scope tags are tied to role permissions in a way you might not realize, and it shows up when an admin has **more than one role assignment** with different tags. It's one of the more complex parts of Intune RBAC.
 
-By default, if those assignments share a permission category (for example, **Mobile apps**), Intune **merges** the permissions across them. Microsoft's example: an *App Admins* group has a Read-only role for Mobile apps scoped to *Headquarters*, and a full Create/Read/Update/Delete role for Mobile apps scoped to *Regional Office*. Because both share the Mobile apps category, the group ends up with full permissions in **both** places, not the read-only access you intended at Headquarters.
+By default, if those assignments share a permission category (for example, **Mobile apps**), Intune **merges** the permissions across them. Yes, *merged*. Microsoft's example: an *App Admins* group has a Read-only role for Mobile apps scoped to *Headquarters*, and a full Create/Read/Update/Delete role for Mobile apps scoped to *Regional Office*. Because both share the Mobile apps category, the group ends up with full permissions in **both** places, not the read-only access you intended at Headquarters.
 
 **Scoped permissions** (opt-in public preview since March 2026) fixes this. Each assignment's permissions stay inside its own scope tags, so *App Admins* gets read-only at Headquarters and full control at Regional Office, exactly as designed. Microsoft says it will become the default for all tenants in a future release.
 
