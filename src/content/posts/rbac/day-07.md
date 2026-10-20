@@ -42,12 +42,37 @@ Now the Seattle admin opens the same admin center as everyone else, but sees onl
 - **Entra roles ignore tags.** Intune Administrator has full access no matter what. (Day 2's two permission planes again.)
 - **Creating, renaming, or deleting tags requires the Entra Intune Administrator role.** It's a good candidate for just-in-time access (Week 4).
 
+## Scoped permissions
+
+Scope tags have one more twist, and it shows up when an admin has **more than one role assignment** with different tags.
+
+By default, if those assignments share a permission category (for example, **Mobile apps**), Intune **merges** the permissions across them. Microsoft's example: an *App Admins* group has a Read-only role for Mobile apps scoped to *Headquarters*, and a full Create/Read/Update/Delete role for Mobile apps scoped to *Regional Office*. Because both share the Mobile apps category, the group ends up with full permissions in **both** places, not the read-only access you intended at Headquarters.
+
+**Scoped permissions** (opt-in public preview since March 2026) fixes this. Each assignment's permissions stay inside its own scope tags, so *App Admins* gets read-only at Headquarters and full control at Regional Office, exactly as designed. Microsoft says it will become the default for all tenants in a future release.
+
+### Check your tenant
+
+1. Go to **Tenant administration** › **Roles** › **Settings**.
+2. Select **Generate Report** to run the **Permissions Assessment Report**. It lists every admin group that would *lose* permissions when scoped permissions is turned on: the roles being merged, the scope tag, the resource, and the old vs. new permissions. You can run it as often as you like and export it to Excel.
+3. **If the report returns no results**, nobody in your tenant is getting extra access from merging, and turning on scoped permissions won't take anything away. Turn on the **Scoped permissions** toggle on the same page, so future assignments behave the way you design them.
+4. **If it does return rows**, those are admins who currently have more access than their role assignments suggest. Review each one, adjust the assignments if needed, and tell the affected admins before you turn it on.
+
+Two things to know before you flip the switch:
+
+- **It's one-way.** Enabling scoped permissions can't be undone.
+- **It needs the right account.** Microsoft recommends a custom Intune role with **Organization** › **Update** (no built-in Intune role includes it). The Entra Intune Administrator role also works, but it's privileged.
+
+We'll come back to multiple role assignments in Week 3, when we get to design patterns.
+
 ## Try it
 
 Go to **Tenant administration** › **Roles** › **Scope (Tags)**. If the only tag listed is **Default**, nobody in your tenant is scoped by visibility yet, and every admin with an Intune role can see every object their permissions cover.
+
+While you're there, open **Settings** and run the Permissions Assessment Report.
 
 Tomorrow: getting tags onto devices, which works differently from policies.
 
 ## Further reading
 
 - [Use RBAC and scope tags for distributed IT](https://learn.microsoft.com/en-us/intune/fundamentals/role-based-access-control/scope-tags), Microsoft Learn
+- [Permission behavior across role assignments](https://learn.microsoft.com/en-us/intune/fundamentals/role-based-access-control/scope-tags#permission-behavior-across-role-assignments) (scoped permissions and the Permissions Assessment Report), Microsoft Learn
