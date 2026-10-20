@@ -5,6 +5,7 @@ day: 6
 week: 2
 date: 2026-10-19
 summary: Every role assignment answers two "who" questions. Members are the admins who act. Scope groups are the users and devices they can act on.
+linkedin: https://lnkd.in/p/gAyWrdY4
 diagram: /images/rbac/day-06.png
 diagramAlt: "A role assignment splits into two sides. Left: Members (admin groups), who acts, for example RBAC-HelpDesk-Seattle. Right: Scope groups, who they can act on, for example Seattle users and Seattle devices. Below, the three scope group options: specific groups (recommended), All users, and All devices, with warnings that the All options reach everyone and that exclude groups must sit inside the scope groups."
 ---
