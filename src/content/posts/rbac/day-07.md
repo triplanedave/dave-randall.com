@@ -5,6 +5,7 @@ day: 7
 week: 2
 date: 2026-10-20
 summary: Roles decide what admins can do. Scope tags decide which objects they can see. Same console, two admins, two very different views.
+linkedin: https://lnkd.in/p/gQETB5Hq
 diagram: /images/rbac/day-07.png
 diagramAlt: "Four Intune objects with scope tags: Seattle Wi-Fi tagged Seattle, Paris VPN tagged Paris, Teams app tagged Seattle and Paris, and Security baseline tagged Default. The Seattle admin, whose assignment has the Seattle tag, sees Seattle Wi-Fi and the Teams app. The Paris admin sees Paris VPN and the Teams app. Neither sees the Default-tagged baseline."
 ---
