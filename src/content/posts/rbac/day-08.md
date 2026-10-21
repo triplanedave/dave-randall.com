@@ -5,6 +5,7 @@ day: 8
 week: 2
 date: 2026-10-21
 summary: Policies get tags from their properties. Devices get them from groups, and group-based tags win over anything you set by hand.
+linkedin: https://lnkd.in/p/gKFvvD_v
 diagram: /images/rbac/day-08.png
 diagramAlt: "Flow: a dynamic device group, for example devices whose name starts with SEA, is added to the Assignments of the Seattle scope tag. Every device in the group gets the Seattle tag automatically and becomes visible to Seattle admins. Side notes: group-based tags overwrite manually set tags, a device in several tagged groups gets all of those tags, and Windows Autopilot device records can't be tagged."
 ---
