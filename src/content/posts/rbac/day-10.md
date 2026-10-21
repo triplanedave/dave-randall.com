@@ -15,7 +15,7 @@ On Day 1, I promised one scoping gotcha and how to avoid it. This is it.
 
 Microsoft's docs: "The default scope tag is automatically added to all untagged objects that support scope tags."
 
-In a tenant that's been running for a while without scope tags, that's **almost everything**: every profile, policy, app, and device created before anyone thought about tags. So the **Default** tag isn't "no tag." It's the biggest tag in your tenant.
+In a tenant that's been running for a while without scope tags, that's **almost everything**: every profile, policy, app, and device created before anyone thought about tags. So **Default** doesn't mean "nothing." It's the biggest tag you have.
 
 ## How it leaks access
 
@@ -41,7 +41,7 @@ In a tenant that's been running for a while without scope tags, that's **almost 
 
 Do step 1 today. The number of assignments that include Default, or no tags at all, is a good measure of how much of your tenant is really scoped.
 
-That's a wrap on **Week 2: Scoping**. Next week: design patterns, including what happens when one admin has *several* role assignments with different tags. It's not what most people expect.
+That's a wrap on **Week 2: Scoping**. 🎉 Next week is design patterns, starting with what happens when one admin has *several* role assignments with different tags. It's not what most people expect. I mentioned this earlier this week ([Day 7: Scoped permissions](/rbac/day-07/#scoped-permissions)), and we'll cover more about scoped permissions next week.
 
 ## Further reading
 
