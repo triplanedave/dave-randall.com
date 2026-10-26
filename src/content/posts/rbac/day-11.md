@@ -15,13 +15,13 @@ Welcome to **Week 3: Design patterns**. Weeks 1 and 2 covered the building block
 
 Microsoft's guidance is direct: "If a least privileged built-in role grants excessive privileges or permissions, consider using a custom role to limit the scope of administrative access."
 
-Built-in roles are designed for common jobs, and they're the same in every tenant. Your jobs aren't. Help Desk Operator includes **Wipe** and **Retire**. If your tier 1 team shouldn't wipe devices, the built-in role is too broad, and you can't edit it.
+Built-in roles are designed for common jobs, and they're the same in every tenant. Your jobs aren't. I know the vast majority of customers are using built-in roles, so it's likely your admins are over-permissioned for their job. For example, Help Desk Operator includes **Wipe** and **Retire**, and you can't edit it. If your tier 1 team shouldn't wipe devices, you need a custom role.
 
 ## Two ways to build one
 
 **From scratch:** **Tenant administration** › **Roles** › **All roles** › **Create**.
 
-**From a built-in role:** select the role's checkbox › **Duplicate**. All the permissions *and scope tags* from the original are copied, so review both before you save.
+**From a built-in role:** select the role's checkbox › **Duplicate**. All the permissions *and scope tags* from the original are copied, so review both before you save. This is the method I prefer: you start from a working role and remove what the job doesn't need.
 
 Either way, the wizard has the same pages:
 
