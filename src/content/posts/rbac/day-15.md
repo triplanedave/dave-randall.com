@@ -37,6 +37,12 @@ Notice what's not there: **Intune's own RBAC roles.** Help Desk Operator, Applic
 
 GDAP support also doesn't cover enrolling Microsoft Tunnel servers or installing Intune connectors (such as the Intune Connector for Active Directory), so plan those tasks with the customer.
 
+## It varies, so talk about it
+
+To be honest, MSP-based RBAC configurations can and do vary from MSP to MSP. Some customers are OK with the GDAP roles. Other customers need much finer-grained permissions before they'll have an MSP manage their tenant.
+
+**MSPs:** take time to discuss the permissions model you use with your customers. **Customers:** be sure you feel 100% comfortable with the permissions granted to your MSP. It's still your data, after all.
+
 ## For partners: least privilege anyway
 
 - **Read-only by default.** Map most technicians to **Global Reader** or **Reports Reader**. Many tickets only need to look.
