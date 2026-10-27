@@ -82,16 +82,6 @@
 
     <!-- Android App Container Frame -->
     <div class="android-frame w-full max-w-md h-screen md:h-[920px] bg-slate-50 dark:bg-slate-900 md:rounded-[40px] border-0 md:border-[10px] border-slate-800 flex flex-col overflow-hidden relative shadow-2xl transition-all">
-        
-        <!-- Android Status Bar -->
-        <div class="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-6 py-2 flex justify-between items-center text-xs font-semibold select-none z-30">
-            <span>09:41</span>
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-wifi"></i>
-                <i class="fa-solid fa-signal"></i>
-                <i class="fa-solid fa-battery-full"></i>
-            </div>
-        </div>
 
         <!-- Top App Bar -->
         <header class="bg-white dark:bg-slate-800 px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center z-20">
@@ -100,8 +90,8 @@
                     <i class="fa-solid fa-utensils"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-tight">NutriScan M3</h1>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">35g Macro Goal Optimizer</p>
+                    <h1 class="font-bold text-lg leading-tight">TCCS NutriScan</h1>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium"><span class="goalText">35</span>g macro goal</p>
                 </div>
             </div>
             <div class="flex items-center gap-1">
@@ -115,6 +105,15 @@
             </div>
         </header>
 
+        <!-- Goal Switch (visible on every tab) -->
+        <div class="bg-white dark:bg-slate-800 px-5 py-2 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between z-20">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Goal per macro</span>
+            <div class="inline-flex rounded-full bg-slate-100 dark:bg-slate-700 p-1 gap-1" role="group" aria-label="Macro goal">
+                <button id="goal-25" onclick="setGoal(25)" class="px-4 py-1 rounded-full text-xs font-bold transition">25g</button>
+                <button id="goal-35" onclick="setGoal(35)" class="px-4 py-1 rounded-full text-xs font-bold transition">35g</button>
+            </div>
+        </div>
+
         <!-- Tab Navigation Bar -->
         <nav class="flex border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 z-10">
             <button onclick="switchTab('scanner')" id="tab-scanner" class="flex-1 py-3 text-center text-xs font-bold text-indigo-600 border-b-2 border-indigo-600 flex flex-col items-center gap-1 transition-all">
@@ -125,7 +124,7 @@
                 <span id="badge-count" class="absolute top-2 right-6 bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px]">0</span>
             </button>
             <button onclick="switchTab('recommendation')" id="tab-recommendation" class="flex-1 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 flex flex-col items-center gap-1 transition-all">
-                <i class="fa-solid fa-calculator text-base"></i> Servings AI
+                <i class="fa-solid fa-sliders text-base"></i> Optimize
             </button>
         </nav>
 
@@ -195,7 +194,10 @@
                         </div>
                         <div>
                             <label class="text-[11px] font-semibold text-slate-500">UPC Code (Optional)</label>
-                            <input type="text" id="inputUPC" placeholder="012345678901" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <div class="flex gap-2">
+                            <input type="text" id="inputUPC" inputmode="numeric" placeholder="012345678901" class="flex-1 min-w-0 text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button type="button" onclick="lookupFromManual()" class="px-3 text-xs font-semibold rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">Look up</button>
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div>
@@ -227,7 +229,7 @@
                         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
                             Current Macro Totals (1 Serving Each)
                         </h2>
-                        <span class="text-[10px] font-semibold bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full text-slate-500">Target: 35g Each</span>
+                        <span class="text-[10px] font-semibold bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full text-slate-500">Target: <span class="goalText">35</span>g each</span>
                     </div>
 
                     <!-- Macro Progress Bars -->
@@ -238,7 +240,7 @@
                                 <span class="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-bold">
                                     <i class="fa-solid fa-droplet text-[10px]"></i> Total Fat
                                 </span>
-                                <span><strong id="totalFatVal">0</strong> / 35 g</span>
+                                <span><strong id="totalFatVal">0</strong> / <span class="goalText">35</span> g</span>
                             </div>
                             <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
                                 <div id="barFat" class="bg-amber-500 h-full transition-all duration-500 rounded-full" style="width: 0%"></div>
@@ -251,7 +253,7 @@
                                 <span class="text-blue-600 dark:text-blue-400 flex items-center gap-1 font-bold">
                                     <i class="fa-solid fa-wheat-awn text-[10px]"></i> Total Carbs
                                 </span>
-                                <span><strong id="totalCarbsVal">0</strong> / 35 g</span>
+                                <span><strong id="totalCarbsVal">0</strong> / <span class="goalText">35</span> g</span>
                             </div>
                             <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
                                 <div id="barCarbs" class="bg-blue-500 h-full transition-all duration-500 rounded-full" style="width: 0%"></div>
@@ -264,7 +266,7 @@
                                 <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
                                     <i class="fa-solid fa-drumstick-bite text-[10px]"></i> Total Protein
                                 </span>
-                                <span><strong id="totalProteinVal">0</strong> / 35 g</span>
+                                <span><strong id="totalProteinVal">0</strong> / <span class="goalText">35</span> g</span>
                             </div>
                             <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
                                 <div id="barProtein" class="bg-emerald-500 h-full transition-all duration-500 rounded-full" style="width: 0%"></div>
@@ -286,18 +288,12 @@
                 </div>
             </section>
 
-            <!-- TAB 3: SERVING RECOMMENDATION ENGINE -->
+            <!-- TAB 3: OPTIMIZE -->
             <section id="view-recommendation" class="space-y-4 hidden">
                 
-                <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-3xl p-5 shadow-md relative overflow-hidden">
-                    <div class="relative z-10">
-                        <div class="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider mb-1">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            <span>Smart Serving Engine</span>
-                        </div>
-                        <h2 class="text-lg font-bold">Optimized Serving Plan</h2>
-                        <p class="text-xs text-slate-300 mt-1">Calculates exact serving ratios so your scanned items reach or exceed the target of <strong class="text-white">35g Fat, 35g Carbs, and 35g Protein</strong>.</p>
-                    </div>
+                <div class="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <h2 class="text-sm font-bold">Serving Plan</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Servings needed for your scanned items to reach at least <strong class="text-slate-800 dark:text-slate-100"><span class="goalText">35</span>g each</strong> of fat, carbs and protein.</p>
                 </div>
 
                 <!-- Calculated Recommendation Cards Container -->
@@ -330,7 +326,25 @@
         ];
 
         // State Target Constants
-        const TARGET_MACRO = 35.0; // 35 grams target for Fat, Carbs, Protein
+        let targetMacro = 35;
+        try { const g = Number(localStorage.getItem('nutriscanGoal')); if (g === 25 || g === 35) targetMacro = g; } catch (e) {}
+
+        function setGoal(g) {
+            targetMacro = g;
+            try { localStorage.setItem('nutriscanGoal', String(g)); } catch (e) {}
+            document.querySelectorAll('.goalText').forEach(el => el.textContent = g);
+            [25, 35].forEach(v => {
+                const b = document.getElementById(`goal-${v}`);
+                b.className = 'px-4 py-1 rounded-full text-xs font-bold transition ' +
+                    (v === g ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 dark:text-slate-300');
+                b.setAttribute('aria-pressed', v === g);
+            });
+            updateTotalsAndRecommendations();
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
 
         // Application State
         let scannedItems = [
@@ -344,7 +358,7 @@
         window.onload = function() {
             renderPresets();
             renderScannedItems();
-            updateTotalsAndRecommendations();
+            setGoal(targetMacro);
         };
 
         // Theme Toggle Function
@@ -413,7 +427,7 @@
                 instanceId: Date.now()
             };
             scannedItems.push(newItem);
-            showToast(`Added "${newItem.name}" to scan list!`);
+            showToast(`Added ${escapeHtml(newItem.name)}`);
             renderScannedItems();
             updateTotalsAndRecommendations();
         }
@@ -458,9 +472,11 @@
                 <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-700 flex justify-between items-center shadow-sm">
                     <div class="space-y-1">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-slate-800 dark:text-slate-100">${item.name}</span>
-                            <span class="text-[9px] bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-slate-500 font-mono">1 serving</span>
+                            <span class="text-xs font-bold text-slate-800 dark:text-slate-100">${escapeHtml(item.name)}</span>
+                            <span class="text-[9px] bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-slate-500 font-mono">${escapeHtml(item.servingLabel || '1 serving')}</span>
                         </div>
+                        ${item.brand ? `<div class="text-[10px] text-slate-500">${escapeHtml(item.brand)}</div>` : ''}
+                        ${item.upc && item.upc !== 'Custom' ? `<div class="text-[10px] text-slate-400 font-mono">UPC ${escapeHtml(item.upc)}</div>` : ''}
                         <div class="flex gap-2 text-[10px]">
                             <span class="text-amber-600 font-semibold">Fat: ${item.fat}g</span>
                             <span class="text-slate-300">|</span>
@@ -492,15 +508,15 @@
             document.getElementById('totalProteinVal').innerText = totals.protein.toFixed(1);
 
             // Progress bar percentages (capped at 100%)
-            document.getElementById('barFat').style.width = `${Math.min(100, (totals.fat / TARGET_MACRO) * 100)}%`;
-            document.getElementById('barCarbs').style.width = `${Math.min(100, (totals.carbs / TARGET_MACRO) * 100)}%`;
-            document.getElementById('barProtein').style.width = `${Math.min(100, (totals.protein / TARGET_MACRO) * 100)}%`;
+            document.getElementById('barFat').style.width = `${Math.min(100, (totals.fat / targetMacro) * 100)}%`;
+            document.getElementById('barCarbs').style.width = `${Math.min(100, (totals.carbs / targetMacro) * 100)}%`;
+            document.getElementById('barProtein').style.width = `${Math.min(100, (totals.protein / targetMacro) * 100)}%`;
 
             // Calculate Serving Recommendations Engine
             calculateServingRecommendations(totals);
         }
 
-        // Smart Serving Recommendation Engine Algorithm
+        // Serving plan calculation
         function calculateServingRecommendations(currentTotals) {
             const container = document.getElementById('recommendationContent');
 
@@ -508,16 +524,16 @@
                 container.innerHTML = `
                     <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 text-center border border-slate-200 dark:border-slate-700">
                         <i class="fa-solid fa-calculator text-3xl text-slate-300 dark:text-slate-600 mb-2"></i>
-                        <p class="text-xs font-semibold text-slate-400">Add scanned items to calculate serving recommendations.</p>
+                        <p class="text-xs font-semibold text-slate-400">Add items to see the servings you need.</p>
                     </div>
                 `;
                 return;
             }
 
             // Check if 1 serving of each is sufficient
-            const meetsFat = currentTotals.fat >= TARGET_MACRO;
-            const meetsCarbs = currentTotals.carbs >= TARGET_MACRO;
-            const meetsProtein = currentTotals.protein >= TARGET_MACRO;
+            const meetsFat = currentTotals.fat >= targetMacro;
+            const meetsCarbs = currentTotals.carbs >= targetMacro;
+            const meetsProtein = currentTotals.protein >= targetMacro;
 
             const isAllSufficient = meetsFat && meetsCarbs && meetsProtein;
 
@@ -528,7 +544,7 @@
                             <i class="fa-solid fa-circle-check text-2xl text-emerald-600 dark:text-emerald-400"></i>
                             <div>
                                 <h3 class="font-bold text-sm">Targets Achieved!</h3>
-                                <p class="text-xs">1 serving of each item is sufficient to reach 35g of Fat, Carbs, and Protein.</p>
+                                <p class="text-xs">1 serving of each item reaches ${targetMacro}g of fat, carbs and protein.</p>
                             </div>
                         </div>
                     </div>
@@ -538,11 +554,11 @@
 
             // Calculation of Uniform Multiplier required to cover deficient macros
             // S = max(1, Target_Fat / Total_Fat, Target_Carbs / Total_Carbs, Target_Protein / Total_Protein)
-            const fatRatio = currentTotals.fat > 0 ? TARGET_MACRO / currentTotals.fat : 1;
-            const carbsRatio = currentTotals.carbs > 0 ? TARGET_MACRO / currentTotals.carbs : 1;
-            const proteinRatio = currentTotals.protein > 0 ? TARGET_MACRO / currentTotals.protein : 1;
+            const fatRatio = currentTotals.fat > 0 ? targetMacro / currentTotals.fat : 1;
+            const carbsRatio = currentTotals.carbs > 0 ? targetMacro / currentTotals.carbs : 1;
+            const proteinRatio = currentTotals.protein > 0 ? targetMacro / currentTotals.protein : 1;
 
-            // Multiplier to bring all macros to at least 35g
+            // Multiplier to bring all macros to at least the goal
             const uniformMultiplier = Math.max(1, fatRatio, carbsRatio, proteinRatio);
 
             // Proportional macro contribution optimization strategy
@@ -570,23 +586,23 @@
                     <div>
                         <strong>1 Serving Insufficient:</strong> Base total is 
                         <span class="underline font-semibold">${currentTotals.fat.toFixed(1)}g F / ${currentTotals.carbs.toFixed(1)}g C / ${currentTotals.protein.toFixed(1)}g P</span>. 
-                        Adjust servings as recommended below to hit or exceed 35g each.
+                        Use the servings below to reach at least ${targetMacro}g each.
                     </div>
                 </div>
 
                 <!-- Item Breakdown List -->
                 <div class="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700 pb-2">
-                        Recommended Servings Breakdown
+                        Servings per Item
                     </h3>
                     
                     <div class="space-y-3">
                         ${itemRecommendations.map(item => `
                             <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
                                 <div class="flex justify-between items-center mb-1.5">
-                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-100">${item.name}</span>
+                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-100">${escapeHtml(item.name)}</span>
                                     <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/80 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
-                                        ${item.recServings} x Servings
+                                        ${item.recServings} × ${escapeHtml(item.servingLabel || 'serving')}
                                     </span>
                                 </div>
                                 <div class="grid grid-cols-3 gap-1 text-[10px] text-center font-medium mt-2">
@@ -615,15 +631,15 @@
                     <div class="space-y-2 pt-1">
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold text-amber-600 flex items-center gap-1"><i class="fa-solid fa-check text-[10px]"></i> Total Fat:</span>
-                            <span class="font-bold ${projFat >= 35 ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projFat}g / 35g</span>
+                            <span class="font-bold ${Number(projFat) >= targetMacro ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projFat}g / ${targetMacro}g</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold text-blue-600 flex items-center gap-1"><i class="fa-solid fa-check text-[10px]"></i> Total Carbs:</span>
-                            <span class="font-bold ${projCarbs >= 35 ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projCarbs}g / 35g</span>
+                            <span class="font-bold ${Number(projCarbs) >= targetMacro ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projCarbs}g / ${targetMacro}g</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold text-emerald-600 flex items-center gap-1"><i class="fa-solid fa-check text-[10px]"></i> Total Protein:</span>
-                            <span class="font-bold ${projProtein >= 35 ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projProtein}g / 35g</span>
+                            <span class="font-bold ${Number(projProtein) >= targetMacro ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projProtein}g / ${targetMacro}g</span>
                         </div>
                     </div>
                 </div>
@@ -643,7 +659,14 @@
             status.className = 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 font-semibold';
             controls.classList.remove('hidden');
 
-            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode = new Html5Qrcode("reader", {
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E,
+                    Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8
+                ],
+                experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                verbose: false
+            });
 
             const config = { fps: 10, qrbox: { width: 220, height: 120 } };
 
@@ -691,27 +714,92 @@
             status.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500';
         }
 
-        // Handle detected UPC Code
-        function handleBarcodeScanned(upc) {
-            // Check if UPC exists in sample DB
-            const matched = SAMPLE_DATABASE.find(item => item.upc === upc);
-            
-            if (matched) {
-                addScannedItem({ ...matched });
-            } else {
-                // Generate a mock scanned item if unknown UPC code detected
-                const mockItem = {
-                    id: Date.now().toString(),
-                    name: `Scanned Item (${upc.slice(-4)})`,
-                    upc: upc,
-                    fat: Math.floor(Math.random() * 12) + 2,
-                    carbs: Math.floor(Math.random() * 25) + 5,
-                    protein: Math.floor(Math.random() * 18) + 4
-                };
-                addScannedItem(mockItem);
+        // Look up a UPC/EAN in Open Food Facts. Returns an item, or null if unknown.
+        async function lookupProduct(code) {
+            const digits = String(code).replace(/\D/g, '');
+            const candidates = [...new Set([digits, digits.length === 12 ? '0' + digits : null, digits.replace(/^0+/, '')].filter(Boolean))];
+            for (const c of candidates) {
+                try {
+                    const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${c}.json?fields=product_name,brands,serving_size,nutriments`);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    if (data.status !== 1 || !data.product) continue;
+                    const p = data.product, n = p.nutriments || {};
+                    const pick = suffix => {
+                        const f = n['fat' + suffix], cb = n['carbohydrates' + suffix], pr = n['proteins' + suffix];
+                        return (f == null && cb == null && pr == null) ? null
+                            : { fat: +(f || 0), carbs: +(cb || 0), protein: +(pr || 0) };
+                    };
+                    let macros = pick('_serving'), servingLabel = p.serving_size ? `1 serving (${p.serving_size})` : '1 serving';
+                    if (!macros) { macros = pick('_100g'); servingLabel = '100 g'; }
+                    const round = v => Math.round(v * 10) / 10;
+                    return {
+                        id: c,
+                        name: p.product_name || `Product ${c}`,
+                        brand: (p.brands || '').split(',')[0].trim(),
+                        upc: digits,
+                        servingLabel,
+                        hasMacros: !!macros,
+                        fat: round(macros ? macros.fat : 0),
+                        carbs: round(macros ? macros.carbs : 0),
+                        protein: round(macros ? macros.protein : 0)
+                    };
+                } catch (e) {
+                    console.error('Lookup failed', e);
+                }
             }
+            return null;
+        }
 
+        // Handle detected UPC Code
+        let isLookingUp = false;
+        async function handleBarcodeScanned(upc) {
+            if (isLookingUp) return;
+            isLookingUp = true;
             stopCamera();
+            try {
+                const local = SAMPLE_DATABASE.find(item => item.upc === upc);
+                if (local) { addScannedItem({ ...local }); return; }
+
+                showToast(`Looking up ${escapeHtml(upc)}…`);
+                const found = await lookupProduct(upc);
+                if (found && found.hasMacros) {
+                    addScannedItem(found);
+                } else {
+                    // Unknown product or no nutrition data: hand off to manual entry
+                    openManualForm({ name: found ? found.name : '', upc });
+                    showToast(found ? 'No nutrition data found. Enter it from the label.' : 'Product not found. Enter it manually.');
+                }
+            } finally {
+                isLookingUp = false;
+            }
+        }
+
+        function openManualForm(prefill = {}) {
+            switchTab('scanner');
+            const form = document.getElementById('manualForm');
+            if (form.classList.contains('hidden')) toggleManualForm();
+            if (prefill.name != null) document.getElementById('inputName').value = prefill.name;
+            if (prefill.upc != null) document.getElementById('inputUPC').value = prefill.upc;
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Fill the manual form from a typed UPC
+        async function lookupFromManual() {
+            const upc = document.getElementById('inputUPC').value.trim();
+            if (!upc) { showToast('Enter a UPC first'); return; }
+            showToast(`Looking up ${escapeHtml(upc)}…`);
+            const found = await lookupProduct(upc);
+            if (!found) { showToast('Product not found. Enter it manually.'); return; }
+            document.getElementById('inputName').value = found.brand ? `${found.name} (${found.brand})` : found.name;
+            if (found.hasMacros) {
+                document.getElementById('inputFat').value = found.fat;
+                document.getElementById('inputCarbs').value = found.carbs;
+                document.getElementById('inputProtein').value = found.protein;
+                showToast(`Found: ${escapeHtml(found.name)} (per ${escapeHtml(found.servingLabel)})`);
+            } else {
+                showToast('Found the product, but no nutrition data. Enter it from the label.');
+            }
         }
 
         // Toggle manual form collapsible
