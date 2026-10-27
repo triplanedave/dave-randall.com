@@ -5,6 +5,7 @@ day: 9
 week: 2
 date: 2026-10-22
 summary: Scope groups are about targeting. Scope tags are about visibility. You need both for an admin to see a policy and deploy it where it belongs.
+linkedin: https://lnkd.in/p/gr49jS3D
 diagram: /images/rbac/day-09.png
 diagramAlt: "A two-by-two grid answering: can the Seattle admin assign the Seattle Wi-Fi profile to Seattle devices? If the profile has the Seattle tag and Seattle devices are in scope groups: yes, sees it and can assign it. Tag yes, group no: sees it but can't target Seattle devices. Tag no, group yes: can't see the profile at all. Neither: can't see it or target anything."
 ---
