@@ -5,6 +5,7 @@ day: 11
 week: 3
 date: 2026-10-26
 summary: Built-in roles are a starting point. Custom roles let you grant exactly what a job needs, as long as you know which permissions depend on each other.
+linkedin: https://lnkd.in/p/gMygtAnh
 diagram: /images/rbac/day-11.png
 diagramAlt: "Two ways to build a custom role. Start from scratch under Tenant administration, Roles, All roles, Create, or duplicate a built-in role, which copies its permissions and scope tags. Both paths go through the same steps: Basics, Permissions, Scope tags, Review and create. Below, permission pairs that only work together: Set primary user needs Managed devices Read and Update, Bypass activation lock needs Managed devices Read, Remote assistance connectors Update needs Read, and Organization Read is required for enrollment workflows."
 ---
