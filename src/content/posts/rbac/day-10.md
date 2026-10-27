@@ -5,6 +5,7 @@ day: 10
 week: 2
 date: 2026-10-23
 summary: '"Default" doesn''t mean "nothing." It means every untagged object in your tenant. Here''s how it leaks access, and a step-by-step way to avoid it.'
+linkedin: https://lnkd.in/p/g8CdzGK5
 diagram: /images/rbac/day-10.png
 diagramAlt: "The Default scope tag is a bucket holding every untagged object in the tenant. A regional admin whose assignment has Seattle and Default tags sees everything in the bucket. The same admin with only the Seattle tag sees only Seattle objects. A warning notes that an assignment with no scope tags at all sees every object."
 ---
