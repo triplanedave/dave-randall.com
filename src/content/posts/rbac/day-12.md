@@ -5,6 +5,7 @@ day: 12
 week: 3
 date: 2026-10-27
 summary: Design roles around the jobs people actually do, not the people doing them. Four steps take you from a persona to a role you can defend.
+linkedin: https://lnkd.in/p/gWMSrgkK
 diagram: /images/rbac/day-12.png
 diagramAlt: "Four steps from persona to role: 1 Persona, for example Help Desk Tier 1; 2 Tasks, such as sync, restart, lock, and view device details; 3 Permissions, such as Managed devices Read, Remote tasks Sync devices, Reboot now, and Remote lock; 4 Role, a custom role named Help Desk – Tier 1. Below, four example personas with their starting point: Help Desk Tier 1 from Help Desk Operator minus Wipe and Retire; App Packager from Application Manager; Security Analyst from Endpoint Security Manager; Auditor from Read Only Operator minus Get FileVault key."
 ---
