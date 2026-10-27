@@ -316,7 +316,7 @@
                 
                 <div class="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm">
                     <h2 class="text-sm font-bold">Serving Plan</h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Servings needed for your scanned items to reach at least <strong class="text-slate-800 dark:text-slate-100"><span class="goalText">35</span>g each</strong> of fat, carbs and protein.</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Servings that keep fat, carbs and protein at or under <strong class="text-slate-800 dark:text-slate-100"><span class="goalText">35</span>g each</strong>.</p>
                 </div>
 
                 <!-- Calculated Recommendation Cards Container -->
@@ -554,63 +554,49 @@
                 return;
             }
 
-            // Check if 1 serving of each is sufficient
-            const meetsFat = currentTotals.fat >= targetMacro;
-            const meetsCarbs = currentTotals.carbs >= targetMacro;
-            const meetsProtein = currentTotals.protein >= targetMacro;
+            // The goal is a ceiling: scale servings so the largest macro lands on
+            // the goal and no macro goes over. Servings = goal / largest macro.
+            const macros = [
+                ['Fat', currentTotals.fat],
+                ['Carbs', currentTotals.carbs],
+                ['Protein', currentTotals.protein]
+            ];
+            const [limitName, limitValue] = macros.reduce((a, b) => (b[1] > a[1] ? b : a));
 
-            const isAllSufficient = meetsFat && meetsCarbs && meetsProtein;
-
-            if (isAllSufficient) {
+            if (limitValue <= 0) {
                 container.innerHTML = `
-                    <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-3xl p-5 text-emerald-900 dark:text-emerald-200">
-                        <div class="flex items-center gap-3 mb-2">
-                            <i class="fa-solid fa-circle-check text-2xl text-emerald-600 dark:text-emerald-400"></i>
-                            <div>
-                                <h3 class="font-bold text-sm">Targets Achieved!</h3>
-                                <p class="text-xs">1 serving of each item reaches ${targetMacro}g of fat, carbs and protein.</p>
-                            </div>
-                        </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 text-center border border-slate-200 dark:border-slate-700">
+                        <p class="text-xs font-semibold text-slate-400">These items have no fat, carbs or protein, so there's nothing to scale.</p>
                     </div>
                 `;
                 return;
             }
 
-            // Calculation of Uniform Multiplier required to cover deficient macros
-            // S = max(1, Target_Fat / Total_Fat, Target_Carbs / Total_Carbs, Target_Protein / Total_Protein)
-            const fatRatio = currentTotals.fat > 0 ? targetMacro / currentTotals.fat : 1;
-            const carbsRatio = currentTotals.carbs > 0 ? targetMacro / currentTotals.carbs : 1;
-            const proteinRatio = currentTotals.protein > 0 ? targetMacro / currentTotals.protein : 1;
+            // Round down to 2 decimals so rounding never pushes a macro over the goal
+            const multiplier = Math.floor((targetMacro / limitValue) * 100) / 100;
 
-            // Multiplier to bring all macros to at least the goal
-            const uniformMultiplier = Math.max(1, fatRatio, carbsRatio, proteinRatio);
+            const itemRecommendations = scannedItems.map(item => ({
+                ...item,
+                recServings: multiplier,
+                projectedFat: (item.fat * multiplier).toFixed(1),
+                projectedCarbs: (item.carbs * multiplier).toFixed(1),
+                projectedProtein: (item.protein * multiplier).toFixed(1)
+            }));
 
-            // Proportional macro contribution optimization strategy
-            // Calculate recommended serving (s_i) per item
-            const itemRecommendations = scannedItems.map(item => {
-                const recServings = (1 * uniformMultiplier);
-                return {
-                    ...item,
-                    recServings: Number(recServings.toFixed(2)),
-                    projectedFat: (item.fat * recServings).toFixed(1),
-                    projectedCarbs: (item.carbs * recServings).toFixed(1),
-                    projectedProtein: (item.protein * recServings).toFixed(1)
-                };
-            });
+            const projFat = (currentTotals.fat * multiplier).toFixed(1);
+            const projCarbs = (currentTotals.carbs * multiplier).toFixed(1);
+            const projProtein = (currentTotals.protein * multiplier).toFixed(1);
 
-            // Projected combined macro totals with recommended servings
-            const projFat = (currentTotals.fat * uniformMultiplier).toFixed(1);
-            const projCarbs = (currentTotals.carbs * uniformMultiplier).toFixed(1);
-            const projProtein = (currentTotals.protein * uniformMultiplier).toFixed(1);
+            const direction = multiplier > 1 ? 'Increase' : multiplier < 1 ? 'Reduce' : 'Keep';
+            const plural = scannedItems.length > 1 ? 'of each item ' : '';
 
             container.innerHTML = `
-                <!-- Warning / Status Badge -->
-                <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-3 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2.5">
-                    <i class="fa-solid fa-circle-info text-amber-600 mt-0.5"></i>
+                <!-- Plan summary -->
+                <div class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-3 text-xs text-indigo-900 dark:text-indigo-200 flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-info text-indigo-600 dark:text-indigo-400 mt-0.5"></i>
                     <div>
-                        <strong>1 Serving Insufficient:</strong> Base total is 
-                        <span class="underline font-semibold">${currentTotals.fat.toFixed(1)}g F / ${currentTotals.carbs.toFixed(1)}g C / ${currentTotals.protein.toFixed(1)}g P</span>. 
-                        Use the servings below to reach at least ${targetMacro}g each.
+                        <strong>${direction} to ${multiplier} servings ${plural}</strong>so no macro goes over ${targetMacro}g.
+                        ${limitName} is the limit: ${limitValue.toFixed(1)}g per serving.
                     </div>
                 </div>
 
@@ -650,20 +636,20 @@
 
                 <!-- Total Output Result -->
                 <div class="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Projected Combined Totals</h3>
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Totals at These Servings</h3>
                     
                     <div class="space-y-2 pt-1">
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold text-amber-600 flex items-center gap-1"><i class="fa-solid fa-check text-[10px]"></i> Total Fat:</span>
-                            <span class="font-bold ${Number(projFat) >= targetMacro ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projFat}g / ${targetMacro}g</span>
+                            <span class="font-bold ${Number(projFat) >= targetMacro - 0.1 ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projFat}g / ${targetMacro}g</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold text-blue-600 flex items-center gap-1"><i class="fa-solid fa-check text-[10px]"></i> Total Carbs:</span>
-                            <span class="font-bold ${Number(projCarbs) >= targetMacro ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projCarbs}g / ${targetMacro}g</span>
+                            <span class="font-bold ${Number(projCarbs) >= targetMacro - 0.1 ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projCarbs}g / ${targetMacro}g</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold text-emerald-600 flex items-center gap-1"><i class="fa-solid fa-check text-[10px]"></i> Total Protein:</span>
-                            <span class="font-bold ${Number(projProtein) >= targetMacro ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projProtein}g / ${targetMacro}g</span>
+                            <span class="font-bold ${Number(projProtein) >= targetMacro - 0.1 ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projProtein}g / ${targetMacro}g</span>
                         </div>
                     </div>
                 </div>
