@@ -42,6 +42,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- HTML5-QRCode for Webcam Barcode Scanning -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <!-- Tesseract.js for reading Nutrition Facts panels on the device -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         /* Android UI frame styling */
         .android-frame {
@@ -117,7 +119,7 @@
         <!-- Tab Navigation Bar -->
         <nav class="flex border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 z-10">
             <button onclick="switchTab('scanner')" id="tab-scanner" class="flex-1 py-3 text-center text-xs font-bold text-indigo-600 border-b-2 border-indigo-600 flex flex-col items-center gap-1 transition-all">
-                <i class="fa-solid fa-barcode text-base"></i> Scanner & Input
+                <i class="fa-solid fa-barcode text-base"></i> Scan
             </button>
             <button onclick="switchTab('items')" id="tab-items" class="flex-1 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 flex flex-col items-center gap-1 transition-all relative">
                 <i class="fa-solid fa-list-check text-base"></i> Scanned Items
@@ -139,11 +141,15 @@
                     <div class="flex justify-between items-center mb-3">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-camera text-indigo-600"></i>
-                            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">UPC Camera Scanner</h2>
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">Scan</h2>
                         </div>
-                        <span id="cameraStatus" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500">Idle</span>
+                        <div class="inline-flex rounded-full bg-slate-100 dark:bg-slate-700 p-1 gap-1" role="group" aria-label="Scan type">
+                            <button id="mode-sku" onclick="setScanMode('sku')" class="px-3 py-1 rounded-full text-xs font-bold transition">SKU</button>
+                            <button id="mode-label" onclick="setScanMode('label')" class="px-3 py-1 rounded-full text-xs font-bold transition">Nutrition Facts</button>
+                        </div>
                     </div>
 
+                    <div id="skuPanel">
                     <!-- Video / Scanner Container -->
                     <div id="scannerContainer" class="relative bg-slate-900 rounded-2xl h-48 flex flex-col items-center justify-center overflow-hidden border border-slate-700">
                         <!-- Laser line effect -->
@@ -153,7 +159,7 @@
 
                         <div id="scannerPlaceholder" class="text-center p-4">
                             <i class="fa-solid fa-qrcode text-4xl text-slate-500 mb-2"></i>
-                            <p class="text-xs text-slate-400 mb-3">Scan product barcodes via camera or quick pre-sets below</p>
+                            <p class="text-xs text-slate-400 mb-3">Point the camera at the product barcode</p>
                             <button onclick="startCamera()" class="bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-medium shadow hover:bg-indigo-700 transition">
                                 <i class="fa-solid fa-power-off mr-1"></i> Start Camera
                             </button>
@@ -164,6 +170,23 @@
                         <button onclick="stopCamera()" class="bg-rose-600 text-white text-xs px-3 py-1.5 rounded-xl font-medium shadow hover:bg-rose-700">
                             Stop Camera
                         </button>
+                    </div>
+                    </div>
+
+                    <!-- Nutrition Facts photo panel -->
+                    <div id="labelPanel" class="hidden">
+                        <div class="relative bg-slate-900 rounded-2xl h-48 flex flex-col items-center justify-center overflow-hidden border border-slate-700">
+                            <img id="labelPreview" alt="" class="hidden absolute inset-0 w-full h-full object-contain opacity-40">
+                            <div class="text-center p-4 relative">
+                                <i class="fa-solid fa-file-lines text-4xl text-slate-500 mb-2"></i>
+                                <p class="text-xs text-slate-400 mb-3">Photograph the Nutrition Facts panel, straight on and filling the frame</p>
+                                <label class="inline-block bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-medium shadow hover:bg-indigo-700 transition cursor-pointer">
+                                    <i class="fa-solid fa-camera mr-1"></i> Take Photo
+                                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleLabelPhoto(this)">
+                                </label>
+                            </div>
+                            <div id="labelProgress" class="hidden absolute inset-x-0 bottom-0 bg-slate-950/85 text-white text-xs py-2 text-center"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -358,6 +381,7 @@
         window.onload = function() {
             renderPresets();
             renderScannedItems();
+            setScanMode('sku');
             setGoal(targetMacro);
         };
 
@@ -650,7 +674,7 @@
         function startCamera() {
             const placeholder = document.getElementById('scannerPlaceholder');
             const scanLine = document.getElementById('scanLine');
-            const status = document.getElementById('cameraStatus');
+            const status = document.getElementById('cameraStatus') || {};
             const controls = document.getElementById('cameraControls');
 
             placeholder.classList.add('hidden');
@@ -709,7 +733,7 @@
             document.getElementById('scannerPlaceholder').classList.remove('hidden');
             document.getElementById('scanLine').classList.add('hidden');
             document.getElementById('cameraControls').classList.add('hidden');
-            const status = document.getElementById('cameraStatus');
+            const status = document.getElementById('cameraStatus') || {};
             status.innerText = 'Idle';
             status.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500';
         }
@@ -802,6 +826,133 @@
             }
         }
 
+        // ---- Scan mode: SKU (barcode) or Nutrition Facts (label photo) ----
+        let scanMode = 'sku';
+        function setScanMode(mode) {
+            scanMode = mode;
+            if (mode !== 'sku' && isScannerRunning) stopCamera();
+            document.getElementById('skuPanel').classList.toggle('hidden', mode !== 'sku');
+            document.getElementById('labelPanel').classList.toggle('hidden', mode !== 'label');
+            [['sku', 'mode-sku'], ['label', 'mode-label']].forEach(([m, id]) => {
+                const b = document.getElementById(id);
+                b.className = 'px-3 py-1 rounded-full text-xs font-bold transition ' +
+                    (m === mode ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 dark:text-slate-300');
+                b.setAttribute('aria-pressed', m === mode);
+            });
+        }
+
+        let pendingServingLabel = null;
+        let labelScanCount = 0;
+        let ocrWorker = null;
+
+        function setLabelProgress(msg) {
+            const el = document.getElementById('labelProgress');
+            el.textContent = msg || '';
+            el.classList.toggle('hidden', !msg);
+        }
+
+        async function getOcrWorker() {
+            if (!ocrWorker) {
+                setLabelProgress('Loading label reader…');
+                ocrWorker = await Tesseract.createWorker('eng', 1, {
+                    logger: m => {
+                        if (m.status === 'recognizing text') setLabelProgress(`Reading label… ${Math.round(m.progress * 100)}%`);
+                    }
+                });
+            }
+            return ocrWorker;
+        }
+
+        // Scale the photo to a size OCR handles well and boost contrast
+        function prepareImage(file) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const scale = 2000 / Math.max(img.width, img.height);
+                    const c = document.createElement('canvas');
+                    c.width = Math.round(img.width * scale);
+                    c.height = Math.round(img.height * scale);
+                    const ctx = c.getContext('2d');
+                    ctx.drawImage(img, 0, 0, c.width, c.height);
+                    const d = ctx.getImageData(0, 0, c.width, c.height), px = d.data;
+                    let min = 255, max = 0;
+                    for (let i = 0; i < px.length; i += 4) {
+                        const g = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+                        px[i] = g; if (g < min) min = g; if (g > max) max = g;
+                    }
+                    const range = Math.max(1, max - min);
+                    for (let i = 0; i < px.length; i += 4) {
+                        const v = ((px[i] - min) / range) * 255;
+                        px[i] = px[i + 1] = px[i + 2] = v;
+                    }
+                    ctx.putImageData(d, 0, 0);
+                    resolve(c);
+                };
+                img.onerror = reject;
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        // Pull fat, carbs, protein and serving size out of the label text
+        function parseNutritionLabel(text) {
+            const t = text.replace(/\r/g, '').replace(/[|]/g, ' ');
+            const NUM = '(<\\s*)?([\\dOo]{1,3}(?:[.,]\\d)?)\\s*(mg|g)?';
+            const grab = (labels) => {
+                for (const label of labels) {
+                    const m = t.match(new RegExp(label + '\\s*[:.]?\\s*' + NUM, 'i'));
+                    if (!m) continue;
+                    if (m[1]) return 0;                                 // "<1g"
+                    let s = m[2].replace(/[Oo]/g, '0').replace(',', '.');
+                    if (!m[3] && s.length > 1 && s.endsWith('9')) s = s.slice(0, -1); // OCR often reads "g" as "9"
+                    let v = parseFloat(s);
+                    if (m[3] && m[3].toLowerCase() === 'mg') v = v / 1000;
+                    if (!isNaN(v)) return Math.round(v * 10) / 10;
+                }
+                return null;
+            };
+            const serving = t.match(/serving\s*size\s*[:.]?\s*([^\n]{1,40})/i);
+            return {
+                fat: grab(['total\\s*fat', '\\bfat']),
+                carbs: grab(['total\\s*carb[a-z]*\\.?', 'carbohydrates?']),
+                protein: grab(['protein']),
+                serving: serving ? serving[1].trim() : null
+            };
+        }
+
+        async function handleLabelPhoto(input) {
+            const file = input.files && input.files[0];
+            input.value = '';
+            if (!file) return;
+            const preview = document.getElementById('labelPreview');
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('hidden');
+            try {
+                setLabelProgress('Preparing photo…');
+                const canvas = await prepareImage(file);
+                const worker = await getOcrWorker();
+                setLabelProgress('Reading label…');
+                const { data } = await worker.recognize(canvas);
+                const r = parseNutritionLabel(data.text || '');
+                const found = ['fat', 'carbs', 'protein'].filter(k => r[k] != null);
+
+                labelScanCount++;
+                pendingServingLabel = r.serving || '1 serving';
+                openManualForm({ name: `Label scan ${labelScanCount}`, upc: '' });
+                document.getElementById('inputFat').value = r.fat ?? '';
+                document.getElementById('inputCarbs').value = r.carbs ?? '';
+                document.getElementById('inputProtein').value = r.protein ?? '';
+
+                if (found.length === 3) showToast('Label read. Check the numbers, then tap Add Item.');
+                else if (found.length) showToast(`Read ${found.length} of 3 values. Fill in the rest from the label.`);
+                else showToast("Couldn't read the label. Try a closer, straighter photo, or type the values.");
+            } catch (e) {
+                console.error('Label read failed', e);
+                showToast('The label reader could not load. Check your connection and try again.');
+            } finally {
+                setLabelProgress('');
+            }
+        }
+
         // Toggle manual form collapsible
         function toggleManualForm() {
             const form = document.getElementById('manualForm');
@@ -831,12 +982,14 @@
                 id: Date.now().toString(),
                 name,
                 upc,
+                servingLabel: pendingServingLabel || undefined,
                 fat,
                 carbs,
                 protein
             });
 
             // Reset manual form
+            pendingServingLabel = null;
             document.getElementById('manualForm').reset();
             toggleManualForm();
         }
