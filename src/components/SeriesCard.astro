@@ -1,11 +1,12 @@
 ---
 import { getEntry } from 'astro:content';
-import { seriesPosts, isLive, urlOf, type Series } from '../lib/content';
+import { seriesPosts, isLive, isExtra, urlOf, type Series } from '../lib/content';
 
 interface Props { series: Series }
 const { series } = Astro.props;
 const topic = await getEntry('topics', series.data.topic);
-const posts = await seriesPosts(series.id);
+// Day progress counts only numbered days; extras like deep dives don't fill a slot.
+const posts = (await seriesPosts(series.id)).filter((p) => !isExtra(p));
 const live = posts.filter((p) => isLive(p));
 const liveDays = new Set(live.map((p) => p.data.day));
 const total = series.data.totalDays;

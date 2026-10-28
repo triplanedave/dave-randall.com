@@ -25,13 +25,19 @@ export async function allTopics() {
   return (await getCollection('topics')).sort((a, b) => a.data.order - b.data.order);
 }
 
-/** Every entry in a series (live and upcoming), in day order. */
+/** A series entry without a day number (an extra, like a deep dive), listed at the end of its week. */
+export const isExtra = (p: Post) => p.data.series !== undefined && p.data.day === undefined;
+
+/** Every entry in a series (live and upcoming), in day order, with extras after the numbered days. */
 export async function seriesPosts(seriesId: string) {
   const all = await getCollection('posts');
   return all
     .filter((p) => p.data.series === seriesId)
-    .sort((a, b) => (a.data.day ?? 0) - (b.data.day ?? 0));
+    .sort((a, b) => (a.data.day ?? Infinity) - (b.data.day ?? Infinity) || a.data.date.getTime() - b.data.date.getTime());
 }
+
+/** How a series entry is labeled: "Day 7", or "Deep dive" for an extra. */
+export const entryLabel = (p: Post) => (isExtra(p) ? 'Deep dive' : `Day ${p.data.day}`);
 
 export function fmtDate(d: Date, opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }) {
   return d.toLocaleDateString('en-US', { timeZone: 'UTC', ...opts });

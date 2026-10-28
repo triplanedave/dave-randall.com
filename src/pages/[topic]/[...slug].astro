@@ -1,7 +1,7 @@
 ---
 import { getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { livePosts, seriesPosts, isLive, urlOf, topicOf, slugOf, fmtDate, postDate, pad, type Post } from '../../lib/content';
+import { livePosts, seriesPosts, isLive, isExtra, urlOf, topicOf, slugOf, fmtDate, postDate, pad, type Post } from '../../lib/content';
 
 export async function getStaticPaths() {
   const posts = await livePosts();
@@ -13,14 +13,16 @@ const { Content } = await render(post);
 const topic = await getEntry('topics', topicOf(post));
 const series = post.data.series ? await getEntry('series', post.data.series) : undefined;
 const siblings = series ? await seriesPosts(series.id) : [];
-const idx = siblings.findIndex((p) => p.id === post.id);
-const prev = idx > 0 ? siblings[idx - 1] : undefined;
-const next = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : undefined;
+// Prev/next walks the numbered days only; an extra (deep dive) has no place in that sequence.
+const days = siblings.filter((p) => !isExtra(p));
+const idx = days.findIndex((p) => p.id === post.id);
+const prev = idx > 0 ? days[idx - 1] : undefined;
+const next = idx >= 0 && idx < days.length - 1 ? days[idx + 1] : undefined;
 const week = series?.data.weeks.find((w) => w.week === post.data.week);
 const hashtagUrl = series?.data.hashtag
   ? `https://www.linkedin.com/feed/hashtag/${series.data.hashtag.replace('#', '').toLowerCase()}/`
   : undefined;
-const title = series ? `Day ${post.data.day}: ${post.data.title}` : post.data.title;
+const title = series && !isExtra(post) ? `Day ${post.data.day}: ${post.data.title}` : post.data.title;
 ---
 <Base
   title={`${title} | ${series?.data.title ?? topic?.data.title}`}
@@ -39,7 +41,7 @@ const title = series ? `Day ${post.data.day}: ${post.data.title}` : post.data.ti
       <header class="post-head">
         {series && (
           <p class="eyebrow day">
-            Day {post.data.day} of {series.data.totalDays}
+            {isExtra(post) ? 'Deep dive' : `Day ${post.data.day} of ${series.data.totalDays}`}
             {week && <> · {series.data.groupLabel} {week.week}: {week.theme}</>}
           </p>
         )}
@@ -93,8 +95,8 @@ const title = series ? `Day ${post.data.day}: ${post.data.title}` : post.data.ti
               {siblings.filter((p) => p.data.week === w.week).map((p) => (
                 <li class={p.id === post.id ? 'cur' : isLive(p) ? '' : 'off'}>
                   {isLive(p) && p.id !== post.id
-                    ? <a href={urlOf(p)}><b>{pad(p.data.day ?? 0)}</b> {p.data.title}</a>
-                    : <span aria-current={p.id === post.id ? 'page' : undefined}><b>{pad(p.data.day ?? 0)}</b> {p.data.title}</span>}
+                    ? <a href={urlOf(p)}><b>{isExtra(p) ? '+' : pad(p.data.day ?? 0)}</b> {p.data.title}</a>
+                    : <span aria-current={p.id === post.id ? 'page' : undefined}><b>{isExtra(p) ? '+' : pad(p.data.day ?? 0)}</b> {p.data.title}</span>}
                 </li>
               ))}
             </ol>

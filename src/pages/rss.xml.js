@@ -1,6 +1,6 @@
 import rss from '@astrojs/rss';
 import { getEntry } from 'astro:content';
-import { livePosts, urlOf } from '../lib/content';
+import { livePosts, urlOf, entryLabel } from '../lib/content';
 
 export async function GET(context) {
   const posts = await livePosts();
@@ -8,7 +8,7 @@ export async function GET(context) {
     posts.map(async (p) => {
       const s = p.data.series ? await getEntry('series', p.data.series) : undefined;
       return {
-        title: s ? `${s.data.title}, Day ${p.data.day}: ${p.data.title}` : p.data.title,
+        title: s ? `${s.data.title}, ${entryLabel(p)}: ${p.data.title}` : p.data.title,
         pubDate: p.data.date,
         description: p.data.summary ?? '',
         link: urlOf(p),

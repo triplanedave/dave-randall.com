@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PostList from '../../components/PostList.astro';
-import { allTopics, seriesPosts, livePosts, isLive, urlOf, topicOf, fmtDate, pad, type Topic } from '../../lib/content';
+import { allTopics, seriesPosts, livePosts, isLive, isExtra, urlOf, topicOf, fmtDate, pad, type Topic } from '../../lib/content';
 
 export async function getStaticPaths() {
   const topics = await allTopics();
@@ -17,7 +17,7 @@ const seriesData = await Promise.all(
     const weeks = s.data.weeks.length
       ? s.data.weeks.map((w) => ({ ...w, posts: posts.filter((p) => p.data.week === w.week) }))
       : posts.length ? [{ week: 0, theme: '', tagline: '', posts }] : [];
-    return { s, weeks, liveCount: posts.filter((p) => isLive(p)).length };
+    return { s, weeks, liveCount: posts.filter((p) => isLive(p) && !isExtra(p)).length };
   }),
 );
 const articles = (await livePosts()).filter((p) => topicOf(p) === topic.id && !p.data.series);
@@ -58,15 +58,15 @@ const articles = (await livePosts()).filter((p) => topicOf(p) === topic.id && !p
               {w.posts.map((p) => {
                 const live = isLive(p);
                 return (
-                  <li class={live ? 'live' : 'soon'}>
+                  <li class={`${live ? 'live' : 'soon'}${isExtra(p) ? ' extra' : ''}`}>
                     {live ? (
                       <a href={urlOf(p)}>
-                        <span class="num">{pad(p.data.day ?? 0)}</span>
+                        <span class="num" aria-hidden={isExtra(p) ? 'true' : undefined}>{isExtra(p) ? '+' : pad(p.data.day ?? 0)}</span>
                         <span class="title">{p.data.title}</span>
                       </a>
                     ) : (
                       <div>
-                        <span class="num">{pad(p.data.day ?? 0)}</span>
+                        <span class="num" aria-hidden={isExtra(p) ? 'true' : undefined}>{isExtra(p) ? '+' : pad(p.data.day ?? 0)}</span>
                         <span class="title">{p.data.title}</span>
                         <span class="when">Coming {fmtDate(p.data.date, { month: 'short', day: 'numeric' })}</span>
                       </div>
@@ -119,6 +119,7 @@ const articles = (await livePosts()).filter((p) => topicOf(p) === topic.id && !p
   .num { font-family: var(--mono); font-weight: 600; color: var(--accent); font-size: 14px; padding-top: 2px; }
   .live .title { font-weight: 600; }
   .soon .num, .soon .title { color: var(--muted); }
+  .extra { border-top: 1px dashed var(--line); margin-top: 4px; }
   .guides { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 12px; }
   .guides a { display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; border: 1px solid var(--line); border-left: 0; border-top: 4px solid var(--accent); border-radius: 12px; text-decoration: none; max-width: 760px; }
   .guides a:hover { border-color: var(--accent); }

@@ -1,6 +1,6 @@
 ---
 import { getEntry } from 'astro:content';
-import { urlOf, topicOf, postDate, type Post } from '../lib/content';
+import { urlOf, topicOf, postDate, entryLabel, type Post } from '../lib/content';
 
 interface Props { posts: Post[] }
 const { posts } = Astro.props;
@@ -8,7 +8,7 @@ const rows = await Promise.all(
   posts.map(async (p) => {
     const s = p.data.series ? await getEntry('series', p.data.series) : undefined;
     const t = await getEntry('topics', topicOf(p));
-    return { p, s, kicker: s ? `${s.data.title} · Day ${p.data.day}` : t?.data.title ?? '' };
+    return { p, s, kicker: s ? `${s.data.title} · ${entryLabel(p)}` : t?.data.title ?? '' };
   }),
 );
 ---
