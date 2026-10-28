@@ -565,6 +565,13 @@
             calculateServingRecommendations(totals);
         }
 
+        // Show quarter servings as fractions: 2.25 -> "2¼", 0.5 -> "½"
+        function formatServings(n) {
+            const whole = Math.floor(n), frac = Math.round((n - whole) * 4);
+            const f = ['', '¼', '½', '¾'][frac];
+            return whole === 0 ? (f || '0') : `${whole}${f}`;
+        }
+
         // Serving plan calculation
         function calculateServingRecommendations(currentTotals) {
             const container = document.getElementById('recommendationContent');
@@ -597,12 +604,13 @@
                 return;
             }
 
-            // Round down to 2 decimals so rounding never pushes a macro over the goal
-            const multiplier = Math.floor((targetMacro / limitValue) * 100) / 100;
+            // Round to the nearest quarter serving (may land slightly over or under the goal)
+            const multiplier = Math.max(0.25, Math.round((targetMacro / limitValue) * 4) / 4);
+            const limitAtServings = limitValue * multiplier;
 
             const itemRecommendations = scannedItems.map(item => ({
                 ...item,
-                recServings: multiplier,
+                recServings: formatServings(multiplier),
                 projectedFat: (item.fat * multiplier).toFixed(1),
                 projectedCarbs: (item.carbs * multiplier).toFixed(1),
                 projectedProtein: (item.protein * multiplier).toFixed(1)
@@ -612,6 +620,8 @@
             const projCarbs = (currentTotals.carbs * multiplier).toFixed(1);
             const projProtein = (currentTotals.protein * multiplier).toFixed(1);
 
+            const macroColor = v => v > targetMacro + 0.05 ? 'text-amber-600'
+                : v >= targetMacro * 0.9 ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100';
             const direction = multiplier > 1 ? 'Increase' : multiplier < 1 ? 'Reduce' : 'Keep';
             const plural = scannedItems.length > 1 ? 'of each item ' : '';
 
@@ -620,8 +630,8 @@
                 <div class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-3 text-xs text-indigo-900 dark:text-indigo-200 flex items-start gap-2.5">
                     <i class="fa-solid fa-circle-info text-indigo-600 dark:text-indigo-400 mt-0.5"></i>
                     <div>
-                        <strong>${direction} to ${multiplier} servings ${plural}</strong>so no macro goes over ${targetMacro}g.
-                        ${limitName} is the limit: ${limitValue.toFixed(1)}g per serving.
+                        <strong>${direction} to ${formatServings(multiplier)} servings ${plural}</strong>(nearest ¼ serving to the ${targetMacro}g goal).
+                        ${limitName} is the limit: ${limitValue.toFixed(1)}g per serving, ${limitAtServings.toFixed(1)}g at this amount${limitAtServings > targetMacro + 0.05 ? ', slightly over the goal' : ''}.
                     </div>
                 </div>
 
@@ -666,15 +676,15 @@
                     <div class="space-y-2 pt-1">
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold text-amber-600 flex items-center gap-1"><i class="fa-solid fa-check text-[10px]"></i> Total Fat:</span>
-                            <span class="font-bold ${Number(projFat) >= targetMacro - 0.1 ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projFat}g / ${targetMacro}g</span>
+                            <span class="font-bold ${macroColor(Number(projFat))}">${projFat}g / ${targetMacro}g</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold text-blue-600 flex items-center gap-1"><i class="fa-solid fa-check text-[10px]"></i> Total Carbs:</span>
-                            <span class="font-bold ${Number(projCarbs) >= targetMacro - 0.1 ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projCarbs}g / ${targetMacro}g</span>
+                            <span class="font-bold ${macroColor(Number(projCarbs))}">${projCarbs}g / ${targetMacro}g</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold text-emerald-600 flex items-center gap-1"><i class="fa-solid fa-check text-[10px]"></i> Total Protein:</span>
-                            <span class="font-bold ${Number(projProtein) >= targetMacro - 0.1 ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}">${projProtein}g / ${targetMacro}g</span>
+                            <span class="font-bold ${macroColor(Number(projProtein))}">${projProtein}g / ${targetMacro}g</span>
                         </div>
                     </div>
                 </div>
