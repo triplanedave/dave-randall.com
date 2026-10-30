@@ -5,6 +5,7 @@ day: 14
 week: 3
 date: 2026-10-29
 summary: When one admin has several role assignments, Intune combines them, and by default it merges permissions across scope tags. Here are the rules, and three ways to design around them.
+linkedin: https://lnkd.in/p/gPwZvqCm
 diagram: /images/rbac/day-14.png
 diagramAlt: "The App Admins group has two role assignments. Assignment A grants Mobile apps Read scoped to the Headquarters tag. Assignment B grants Mobile apps Create, Read, Update and Delete scoped to the Regional Office tag. Default behavior: permissions merge, so App Admins get full Mobile apps permissions on both Headquarters and Regional Office apps. With Scoped permissions turned on: read-only at Headquarters and full permissions at Regional Office, as intended."
 ---
