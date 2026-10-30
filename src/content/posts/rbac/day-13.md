@@ -5,7 +5,7 @@ day: 13
 week: 3
 date: 2026-10-28
 summary: Define each role once, then assign it once per region. A naming convention and a matched set of groups and tags make the pattern repeatable.
-linkedin: https://lnkd.in/p/gPwZvqCm
+linkedin: https://lnkd.in/p/gG6CcW2j
 diagram: /images/rbac/day-13.png
 diagramAlt: "A delegation grid. Rows are two roles, Help Desk – Tier 1 and Policy and Profile Manager. Columns are three regions: Seattle, Paris, and Sydney. Each cell is one role assignment with the region's admin group, scope groups, and scope tag, for example RBAC-HelpDesk-SEA with scope groups SEA users and SEA devices and the Seattle tag. A central IT row spans all regions with the Global tag on shared content. A naming convention strip reads RBAC-role-region for admin groups and region users or devices for scope groups."
 ---
