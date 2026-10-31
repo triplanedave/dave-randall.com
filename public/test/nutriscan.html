@@ -128,6 +128,10 @@
             <button onclick="switchTab('recommendation')" id="tab-recommendation" class="flex-1 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 flex flex-col items-center gap-1 transition-all">
                 <i class="fa-solid fa-sliders text-base"></i> Optimize
             </button>
+            <button onclick="switchTab('meals')" id="tab-meals" class="flex-1 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 flex flex-col items-center gap-1 transition-all relative">
+                <i class="fa-solid fa-bowl-food text-base"></i> Saved Meals
+                <span id="meals-count" class="hidden absolute top-2 right-3 bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px]">0</span>
+            </button>
         </nav>
 
         <!-- Main Content Scroll Area -->
@@ -322,6 +326,11 @@
                 </div>
             </section>
 
+            <!-- TAB 4: SAVED MEALS -->
+            <section id="view-meals" class="space-y-3 hidden">
+                <div id="mealsContainer" class="space-y-3"></div>
+            </section>
+
         </main>
 
         <!-- Android Bottom Navigation Toast / Status Indicator -->
@@ -379,6 +388,7 @@
             renderPresets();
             renderScannedItems();
             setScanMode('sku');
+            renderMeals();
             setGoal(targetMacro);
         };
 
@@ -389,7 +399,7 @@
 
         // Navigation Switcher
         function switchTab(tabName) {
-            ['scanner', 'items', 'recommendation'].forEach(t => {
+            ['scanner', 'items', 'recommendation', 'meals'].forEach(t => {
                 const viewEl = document.getElementById(`view-${t}`);
                 const tabEl = document.getElementById(`tab-${t}`);
                 
@@ -572,10 +582,94 @@
             return whole === 0 ? (f || '0') : `${whole}${f}`;
         }
 
+        // ---- Saved meals (kept on this device) ----
+        const MEALS_KEY = 'nutriscanMeals';
+        let lastPlan = null;
+        let savedMeals;
+        try { savedMeals = JSON.parse(localStorage.getItem(MEALS_KEY)); } catch (e) {}
+        if (!Array.isArray(savedMeals)) savedMeals = [];
+        function persistMeals() {
+            try { localStorage.setItem(MEALS_KEY, JSON.stringify(savedMeals)); } catch (e) {}
+        }
+
+        function saveMeal(e) {
+            e.preventDefault();
+            if (!lastPlan) return;
+            const input = document.getElementById('mealName');
+            const name = input.value.trim() || `Meal ${savedMeals.length + 1}`;
+            savedMeals.unshift({ id: 'm' + Date.now(), name, savedAt: new Date().toISOString(), ...JSON.parse(JSON.stringify(lastPlan)) });
+            persistMeals();
+            input.value = '';
+            renderMeals();
+            showToast(`Saved meal: ${escapeHtml(name)}`);
+        }
+
+        function deleteMeal(id) {
+            const meal = savedMeals.find(m => m.id === id);
+            savedMeals = savedMeals.filter(m => m.id !== id);
+            persistMeals();
+            renderMeals();
+            if (meal) showToast(`Deleted ${escapeHtml(meal.name)}`);
+        }
+
+        // Put a meal's items back in the scanned list and show its plan
+        function loadMeal(id) {
+            const meal = savedMeals.find(m => m.id === id);
+            if (!meal) return;
+            scannedItems = meal.items.map((it, i) => ({ ...it, id: `${id}-${i}`, instanceId: Date.now() + i }));
+            renderScannedItems();
+            setGoal(meal.goal);
+            switchTab('recommendation');
+            showToast(`Loaded ${escapeHtml(meal.name)}`);
+        }
+
+        function renderMeals() {
+            const badge = document.getElementById('meals-count');
+            badge.textContent = savedMeals.length;
+            badge.classList.toggle('hidden', savedMeals.length === 0);
+            const container = document.getElementById('mealsContainer');
+            if (savedMeals.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
+                        <i class="fa-solid fa-bowl-food text-3xl text-slate-300 dark:text-slate-600 mb-2"></i>
+                        <p class="text-xs font-semibold text-slate-400">No saved meals yet</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">Use Save as Meal at the bottom of the Optimize tab.</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = savedMeals.map(m => `
+                <div class="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="min-w-0">
+                            <div class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">${escapeHtml(m.name)}</div>
+                            <div class="text-[10px] text-slate-400">${new Date(m.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} · ${m.goal}g goal</div>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="loadMeal('${m.id}')" class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 rounded-full px-3 py-1">Load</button>
+                            <button onclick="deleteMeal('${m.id}')" aria-label="Delete meal" class="text-slate-400 hover:text-rose-500 p-2 text-sm transition"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        ${m.items.map(it => `
+                            <div class="flex justify-between gap-2 text-xs">
+                                <span class="text-slate-700 dark:text-slate-200 truncate">${escapeHtml(it.name)}</span>
+                                <span class="font-semibold text-indigo-600 dark:text-indigo-400 shrink-0">${formatServings(it.servings)} × ${escapeHtml(it.servingLabel || 'serving')}</span>
+                            </div>`).join('')}
+                    </div>
+                    <div class="grid grid-cols-3 gap-1 text-[10px] text-center font-medium">
+                        <div class="bg-amber-50 dark:bg-amber-950/40 p-1.5 rounded-xl"><div class="text-amber-700 dark:text-amber-400">Fat</div><div class="font-bold">${m.totals.fat.toFixed(1)}g</div></div>
+                        <div class="bg-blue-50 dark:bg-blue-950/40 p-1.5 rounded-xl"><div class="text-blue-700 dark:text-blue-400">Carbs</div><div class="font-bold">${m.totals.carbs.toFixed(1)}g</div></div>
+                        <div class="bg-emerald-50 dark:bg-emerald-950/40 p-1.5 rounded-xl"><div class="text-emerald-700 dark:text-emerald-400">Protein</div><div class="font-bold">${m.totals.protein.toFixed(1)}g</div></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         // Serving plan calculation
         function calculateServingRecommendations(currentTotals) {
             const container = document.getElementById('recommendationContent');
 
+            lastPlan = null;
             if (scannedItems.length === 0) {
                 container.innerHTML = `
                     <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 text-center border border-slate-200 dark:border-slate-700">
@@ -688,7 +782,25 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Save as meal -->
+                <form onsubmit="saveMeal(event)" class="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+                    <label for="mealName" class="text-xs font-bold text-slate-500 uppercase tracking-wider">Save as Meal</label>
+                    <div class="flex gap-2">
+                        <input id="mealName" type="text" placeholder="e.g. Breakfast" maxlength="60" class="flex-1 min-w-0 text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="submit" class="px-4 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow transition"><i class="fa-regular fa-bookmark mr-1"></i>Save</button>
+                    </div>
+                </form>
             `;
+            lastPlan = {
+                goal: targetMacro,
+                multiplier,
+                items: itemRecommendations.map(i => ({
+                    name: i.name, brand: i.brand, upc: i.upc, servingLabel: i.servingLabel,
+                    fat: +i.fat, carbs: +i.carbs, protein: +i.protein, servings: multiplier
+                })),
+                totals: { fat: +projFat, carbs: +projCarbs, protein: +projProtein }
+            };
         }
 
         // Camera Scanner Functions (Html5Qrcode)
