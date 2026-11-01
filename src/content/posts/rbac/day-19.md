@@ -4,7 +4,7 @@ series: rbac-20-days
 day: 19
 week: 4
 date: 2026-11-05
-summary: A good RBAC design drifts unless you check it. Four built-in tools, plus Microsoft Graph, tell you who has what, what changed, and whether it still matches your design.
+summary: A good RBAC design drifts unless you check it. Four built-in tools, Microsoft Graph, and a bonus PowerShell script tell you who has what, what changed, and which permissions nobody uses.
 diagram: /images/rbac/day-19.png
 diagramAlt: "Four ways to check Intune RBAC. Who has what: Tenant administration, Roles, Monitor, with My permissions, Roles by permission and Admin permissions. What changed: Tenant administration, Audit logs, filtered to the Role category, exportable to Azure Monitor, two years through Graph. Who should still have it: Microsoft Entra access reviews of admin groups on a recurring schedule. What would merge: the Permissions Assessment Report. Below, automate with Microsoft Graph: export role definitions and assignments with DeviceManagementRBAC.Read.All, compare against your design baseline, and alert on drift."
 ---
@@ -53,6 +53,55 @@ The admin center is great for a look. Graph is how you check every week without 
 - **Watch the audit stream** for role changes made outside your change process.
 
 If you followed my *19 Days of Intune Graph* series, this is where it pays off: [Day 5](/graph/day-05/) covers assigning Graph permissions for Intune automation, and [Day 14](/graph/day-14/) covers RBAC for the automation itself.
+
+## Bonus: compare permissions to what admins actually do
+
+The Monitor views tell you what admins *can* do. The audit log tells you what they *did*. Put the two together and you can find permissions nobody uses.
+
+I wrote a PowerShell script that does exactly that:
+
+**[Download Get-IntuneRbacExcessPermissions.ps1](/downloads/rbac/Get-IntuneRbacExcessPermissions.ps1)**
+
+It's **read-only**: it makes no changes to your tenant. It:
+
+1. Pulls the last 90 days of Intune audit events (1–365 with `-DaysBack`).
+2. Works out which Intune permission each admin action needed (for example, *Patch DeviceConfiguration* → **Device configurations › Update**).
+3. Reads every role definition and assignment, and expands the admin groups to users.
+4. Credits each role's permissions when one of its members used them.
+5. Reports, per role, which permissions were **never used**.
+
+It also lists every user with **Global Administrator** or **Intune Administrator** in Entra ID, active or PIM-eligible, direct or through a group, since those roles bypass Intune RBAC entirely.
+
+### Running it
+
+```powershell
+Install-Module Microsoft.Graph.Authentication -Scope CurrentUser
+.\Get-IntuneRbacExcessPermissions.ps1 -DaysBack 90 -OutputPath C:\Temp\RbacReview
+```
+
+It signs in with delegated, **read-only** Graph scopes (`DeviceManagementRBAC.Read.All`, `DeviceManagementApps.Read.All`, `GroupMember.Read.All`, `RoleManagement.Read.Directory`, and a few other `.Read.All` scopes). It works in Windows PowerShell 5.1 and PowerShell 7. If you have the **ImportExcel** module, you also get a single Excel workbook.
+
+### What you get
+
+| Report | What it tells you |
+|---|---|
+| **RoleSummary** | Per role: members, active members, permissions granted vs. used |
+| **ExcessivePermissionsByRole** | Unused permissions, with a confidence level and a recommendation |
+| **RolePermissionUsage** | Every permission in every role, used or not, and by whom |
+| **AdminActivity** | Each admin's actions and the permission each one needed |
+| **AdminsOutsideIntuneRBAC** | Global and Intune Administrators, and activity no Intune role covers |
+| **UnmappedEvents** | Audit activity the script couldn't map to a permission |
+| **AppActors** | Apps and service principals making changes |
+
+### Read the results with care
+
+- **Reads aren't audited.** Intune's audit log records changes and remote actions, not views, so unused *Read* permissions are reported separately with low confidence.
+- **The mapping is a heuristic.** Microsoft doesn't publish an audit-to-permission mapping. Check **UnmappedEvents** and extend the mapping tables at the top of the script if needed.
+- **It leans toward *not* flagging.** If several of an admin's roles grant the permission they used, every one is credited.
+- **Scope isn't evaluated.** It looks at permissions, not scope groups or scope tags.
+- **Ninety days isn't forever.** Quarterly or annual tasks may not show up. Talk to the team before you remove anything.
+
+For a built-in role, the fix is a custom copy without the unused permissions (Day 11).
 
 ## A review rhythm that works
 
