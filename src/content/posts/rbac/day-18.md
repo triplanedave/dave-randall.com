@@ -27,8 +27,10 @@ That's not a complaint. Most of these are exactly what customers asked for. But 
 
 ## Built-in vs. custom: they drift differently
 
-- **Built-in roles change under you.** When Microsoft adds a permission to Help Desk Operator, every admin with that role gets it. Usually that's helpful. Occasionally it's more than you want a persona to have.
-- **Custom roles only have what you put in them.** When a new permission ships, your custom roles don't get it. If your help desk suddenly can't do something new, that's usually why.
+While new features are great, they also mean that built-in and custom roles change in different ways:
+
+- **Built-in roles change under you.** When Microsoft adds a permission to Help Desk Operator, every admin with that role gets it. Sometimes What's new doesn't include these changes, so it might not be obvious. Usually that's helpful. Occasionally it's more than you want a persona to have.
+- **Custom roles only have what you put in them.** When a new permission ships, your custom roles don't get it. That means the fancy new feature may be broken out of the gate for your admins until you do something about it.
 
 Either way, the fix is the same: **review on a schedule**, not when something breaks.
 
@@ -50,7 +52,7 @@ What that means for design today: **build on the pieces that will last.** Person
 
 Open **Tenant administration** › **Roles** › **Monitor** › **My permissions** and read your own list top to bottom. Is there anything there you didn't know you had?
 
-Tomorrow: audit and automate, how to know your RBAC is still what you designed.
+Tomorrow: audit and automate, with a bonus PowerShell script to assess permissions against actual admin activity.
 
 ## Further reading
 
