@@ -5,6 +5,7 @@ day: 15
 week: 3
 date: 2026-10-30
 summary: Partners reach customer tenants through GDAP, which grants Entra roles, not Intune roles. That changes how least privilege works for MSPs, and what customers should ask for.
+linkedin: https://lnkd.in/p/gHju8P3k
 diagram: /images/rbac/day-15.png
 diagramAlt: "Partner tenant on the left with security groups such as Tier 1 Support and Intune Engineers. A GDAP relationship arrow, time-bound up to two years and approved by the customer, points to the customer tenant on the right. GDAP grants Microsoft Entra roles only. Entra roles supported for Intune under GDAP: Intune Administrator, Global Reader, Reports Reader, Security Reader, Security Administrator, and Compliance Administrator. A warning notes that Intune Administrator ignores scope tags and reaches the whole tenant. Recommendations: read-only roles by default, Intune Administrator only through just-in-time elevation, and review the relationship regularly."
 ---
