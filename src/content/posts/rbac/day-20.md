@@ -47,7 +47,7 @@ Twenty days ago I said this series would build from the basics to a design you c
 
 You don't have to build all of this at once. If you do three things this month:
 
-1. **Get people off standing Intune Administrator.** Move daily work to built-in or custom roles, and make the rest eligible through PIM.
+1. **Get people off standing Intune Administrator & Global Administrator.** Move daily work to built-in or custom roles, and make the rest eligible through PIM.
 2. **Turn on MAA for device actions.** It's the fastest protection against the worst day.
 3. **Run the Permissions Assessment Report.** Then fix what it finds, or turn on Scoped permissions.
 
