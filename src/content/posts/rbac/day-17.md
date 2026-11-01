@@ -15,7 +15,7 @@ Yesterday was about *when* admins have access. Today is about the changes so ris
 
 Microsoft: Multi Admin Approval (MAA) "protects your Intune tenant against compromised administrative accounts." With an **access policy** in place, a change to a protected resource waits until a *different* admin approves it.
 
-That includes the big accounts. **Global Administrator and Intune Administrator need approval too**, and nobody can approve their own request, even if they're in the approver group.
+That includes the big accounts. **Global Administrator and Intune Administrator need approval too**, and nobody can approve their own request, even if they're in the approver group. More importantly, Global Admins and Intune Admins **can't bypass MAA** once policies are in place: their changes still need a second admin's approval.
 
 ## What you can protect
 
@@ -48,6 +48,11 @@ Two things to tell your team: Intune **doesn't send notifications** for new requ
 - **Requester:** needs the normal permission for the change (for example, **Remote tasks › Wipe**).
 - **Approver:** must be a **direct member** of the policy's approver group *and* have **Read** on that resource. The approver group must be a security group that's directly assigned as an admin group on at least one Intune role assignment.
 - **Policy manager:** a custom role with the Multi Admin Approval **access policy** permissions is Microsoft's recommendation, or the built-in **Multi Admin Approval Policy Manager** role from Day 3.
+- **Policy approver:** someone with the **Multi Admin Approval › Approval for Multi Admin Approval** permission.
+
+### The setup gotcha
+
+Access policies protect themselves: creating or changing one also needs a second admin's approval. So before you create your first policy, add the **Approval for Multi Admin Approval** permission (under the **Multi Admin Approval** category) to an Intune role and assign it. Admins with that role are the ones who can approve access policy changes. Without it, your first policy has nobody to approve it.
 
 ## The setup order that matters
 
@@ -67,6 +72,8 @@ MAA pairs naturally with the personas from Day 12. Your Tier 2 help desk can sti
 ## Try it
 
 Pick one protected resource with the highest blast radius in your tenant (for most, that's **Device actions**). Name the approver group, then check that it has a direct Intune role assignment.
+
+Would you like a deep dive on MAA? Let me know on LinkedIn.
 
 Tomorrow: RBAC keeps expanding, and what that means for how you maintain your design.
 
