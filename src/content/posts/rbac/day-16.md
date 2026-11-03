@@ -5,6 +5,7 @@ day: 16
 week: 4
 date: 2026-11-02
 summary: Standing admin access is access an attacker can use at any time. Privileged Identity Management turns it into access people request when they need it, and lose when they're done.
+linkedin: https://lnkd.in/p/gZwvUk8j
 diagram: /images/rbac/day-16.png
 diagramAlt: "Two ways to elevate with Privileged Identity Management. Method 1: PIM for the Microsoft Entra Intune Administrator role, active in about 10 seconds, full Intune access. Method 2: PIM for Groups, where the user activates membership in a group that holds an Intune RBAC role assignment, active in up to 15 minutes, scoped to that role's permissions, scope groups and scope tags. Below, the activation flow: eligible, request with justification and MFA, optional approval, active for a limited time, then access removed automatically. Candidates for just-in-time: Intune Administrator, Intune Role Administrator, roles with Wipe, Retire or Delete, and scope tag management."
 ---
