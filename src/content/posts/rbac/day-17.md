@@ -5,6 +5,7 @@ day: 17
 week: 4
 date: 2026-11-03
 summary: Multi Admin Approval makes a second admin approve your riskiest changes before Intune applies them, including changes to RBAC itself. Here's how it works, and the setup order that keeps you from locking yourself out.
+linkedin: https://lnkd.in/p/g_bRNb-t
 diagram: /images/rbac/day-17.png
 diagramAlt: "The Multi Admin Approval flow. An admin makes a change and adds a business justification. The request waits as Needs approval. A different admin in the approver group approves or rejects it. The requester selects Complete and Intune applies the change. Approved requests expire if not completed within 3 days. Below, the resources an access policy can protect: apps, compliance policies, configuration policies, device actions (wipe, retire, delete), role-based access control, scripts, and tenant configuration. A warning: set up the approver group's role assignment before creating the Role policy."
 ---
