@@ -5,6 +5,7 @@ day: 18
 week: 4
 date: 2026-11-04
 summary: Intune RBAC isn't finished. New permissions arrive, built-in roles change, and Intune roles now reach Copilot and automation. Your design needs a maintenance plan, not just a launch.
+linkedin: https://lnkd.in/p/giXwuEUJ
 diagram: /images/rbac/day-18.png
 diagramAlt: "A 2026 timeline of Intune RBAC changes. March: Scoped permissions opt-in preview. May: Intune RBAC roles get access to Copilot in Intune. June: Multi Admin Approval enforces on Microsoft Graph automation. July: a dedicated permission for zero-touch enrollment. Also recent: Managed Home Screen permissions added to built-in roles. Below, the takeaway: built-in roles change under you, custom roles only have what you put in them, so review both every release cycle."
 ---
