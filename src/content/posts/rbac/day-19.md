@@ -5,6 +5,7 @@ day: 19
 week: 4
 date: 2026-11-05
 summary: A good RBAC design drifts unless you check it. Four built-in tools, Microsoft Graph, and a bonus PowerShell script tell you who has what, what changed, and which permissions nobody uses.
+linkedin: https://lnkd.in/p/gcy2j9Q4
 diagram: /images/rbac/day-19.png
 diagramAlt: "Four ways to check Intune RBAC. Who has what: Tenant administration, Roles, Monitor, with My permissions, Roles by permission and Admin permissions. What changed: Tenant administration, Audit logs, filtered to the Role category, exportable to Azure Monitor, two years through Graph. Who should still have it: Microsoft Entra access reviews of admin groups on a recurring schedule. What would merge: the Permissions Assessment Report. Below, automate with Microsoft Graph: export role definitions and assignments with DeviceManagementRBAC.Read.All, compare against your design baseline, and alert on drift."
 ---
